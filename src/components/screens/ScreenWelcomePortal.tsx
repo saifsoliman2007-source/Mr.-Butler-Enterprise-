@@ -35,19 +35,8 @@ export const ScreenWelcomePortal: React.FC<ScreenWelcomePortalProps> = ({
         <div className="absolute -bottom-[10%] -right-[10%] w-[60%] h-[60%] bg-[#B0EDF4] dark:bg-[#00444D]/40 rounded-full blur-[110px]" />
       </div>
 
-      {/* Top Header Identity Tag with Safe Inset Awareness */}
-      <div className="relative z-10 w-full flex items-center justify-between px-4 pt-2">
-        <div className="flex items-center gap-2 text-[#00444D] dark:text-[#ABEDFA] text-xs font-semibold tracking-wider uppercase bg-white/70 dark:bg-slate-800/70 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#D9E3F6] dark:border-slate-700 shadow-xs">
-          <Sparkles className="w-3.5 h-3.5 text-[#CCA730]" />
-          <span>Imperial Valet & Concierge</span>
-        </div>
-        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-800/50 px-2.5 py-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">
-          welcome_screen_material_update.html
-        </span>
-      </div>
-
       {/* Main Center Branding Presentation */}
-      <div className="relative z-10 flex flex-col items-center text-center my-auto max-w-md mx-auto w-full py-6 space-y-6">
+      <div className="relative z-10 flex flex-col items-center text-center my-auto max-w-md mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
         
         {/* Official Master Logo Presentation in EGEC */}
         <div className="relative transform hover:scale-105 transition-transform duration-500">
@@ -86,7 +75,7 @@ export const ScreenWelcomePortal: React.FC<ScreenWelcomePortalProps> = ({
       </div>
 
       {/* Bottom Action Area (Docked Action for Onboarding with Safe Area Baseline) */}
-      <div className="relative z-20 w-full max-w-md mx-auto pt-4 flex flex-col items-center gap-3">
+      <div className="relative z-20 w-full max-w-md mx-auto px-4 sm:px-6 pt-4 pb-6 flex flex-col items-center gap-3">
         <button
           onClick={() => onNavigate('create_account')}
           className="w-full min-h-[48px] bg-[#00444D] hover:bg-[#0D5D68] text-white font-semibold text-base py-4 px-6 rounded-2xl shadow-[0_10px_30px_rgba(0,68,77,0.25)] hover:shadow-[0_15px_40px_rgba(0,68,77,0.35)] transition-all duration-300 hover:-translate-y-0.5 border-b-2 border-[#CCA730]/60 flex items-center justify-center gap-3 group active:scale-[0.99] cursor-pointer"

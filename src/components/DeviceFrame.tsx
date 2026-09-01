@@ -98,15 +98,15 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
   orientation = 'portrait',
   children,
 }) => {
-  const config = DEVICE_CONFIGS[deviceType];
+  const config = DEVICE_CONFIGS[deviceType] || DEVICE_CONFIGS.desktop;
   const isLandscape = orientation === 'landscape' && deviceType !== 'desktop';
   const width = isLandscape ? config.landscapeWidth : config.width;
 
   return (
     <div className="w-full flex-1 flex justify-center items-start py-3 sm:py-6 px-3 sm:px-6 transition-all duration-300">
       <div 
-        className={`w-full ${config.aspectClass} flex flex-col transition-all duration-300 rounded-3xl overflow-hidden shadow-sm bg-white dark:bg-slate-900`}
-        style={deviceType !== 'desktop' ? { maxWidth: width } : undefined}
+        className={`w-full ${config?.aspectClass || 'w-full max-w-7xl'} flex flex-col transition-all duration-300 rounded-3xl overflow-hidden shadow-sm bg-white dark:bg-slate-900`}
+        style={deviceType !== 'desktop' && width ? { maxWidth: width } : undefined}
       >
         {children}
       </div>

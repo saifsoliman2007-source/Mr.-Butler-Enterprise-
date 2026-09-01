@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import { ScreenId, Language } from '../../types';
 import { RecurringAppHeader } from '../RecurringAppHeader';
+import { DatePicker, TimePicker, AddressInput, AddressValue } from '../forms';
 import { 
   Sparkle, 
   Scissors, 
   Sparkles, 
-  Heart, 
-  User, 
   CheckCircle2, 
   ArrowLeft, 
-  Calendar, 
-  Clock, 
   Home, 
   Building2,
-  Crown
+  Crown,
+  ArrowRight
 } from 'lucide-react';
 
 interface ScreenBookBeautySalonProps {
@@ -22,26 +20,35 @@ interface ScreenBookBeautySalonProps {
 }
 
 export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ onNavigate, lang }) => {
+  const isRTL = lang === 'ar';
   const [selectedTreatment, setSelectedTreatment] = useState('haircut');
   const [selectedStylist, setSelectedStylist] = useState('julian');
   const [locationType, setLocationType] = useState<'home' | 'suite'>('home');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [time, setTime] = useState('11:00 AM - 01:00 PM');
+  const [address, setAddress] = useState<AddressValue>({
+    street: '1007 Mountain Drive',
+    unit: 'Master Suite 12',
+    city: 'Dubai Marina',
+    postalCode: '00000',
+  });
   const [isBooked, setIsBooked] = useState(false);
 
   const treatments = [
-    { id: 'haircut', title: 'Haircut & Styling', price: '$85', desc: 'Precision cut, wash, and bespoke styling', icon: Scissors },
-    { id: 'facial', title: 'Facial & Skin Therapy', price: '$120', desc: 'Deep hydration with luxury botannicals', icon: Sparkles },
-    { id: 'manicure', title: 'Executive Manicure', price: '$55', desc: 'Nail shaping, cuticle grooming & buff', icon: Sparkle },
-    { id: 'shave', title: 'Royal Hot Towel Shave', price: '$65', desc: 'Straight-razor shave with soothing essential oils', icon: Crown },
+    { id: 'haircut', title: isRTL ? 'قص وتصفيف الشعر الفاخر' : 'Haircut & Styling', price: '$85', desc: isRTL ? 'قص دقيق، غسيل علاجي وتصفيف متقن' : 'Precision cut, wash, and bespoke styling', icon: Scissors },
+    { id: 'facial', title: isRTL ? 'عناية وترطيب البشرة العميقة' : 'Facial & Skin Therapy', price: '$120', desc: isRTL ? 'ترطيب نباتي فاخر ومساج وجه' : 'Deep hydration with luxury botanicals', icon: Sparkles },
+    { id: 'manicure', title: isRTL ? 'مانيكير وبيديكير تنفيذي' : 'Executive Manicure', price: '$55', desc: isRTL ? 'تشكيل الأظافر، تنظيف وتلميع راقٍ' : 'Nail shaping, cuticle grooming & buff', icon: Sparkle },
+    { id: 'shave', title: isRTL ? 'حلاقة ملكية بالفوطة الساخنة' : 'Royal Hot Towel Shave', price: '$65', desc: isRTL ? 'موس كلاسيكي حاد وزيوت عطرية مهدئة' : 'Straight-razor shave with soothing essential oils', icon: Crown },
   ];
 
   const stylists = [
-    { id: 'julian', name: 'Master Stylist Julian', rating: '5.0 ★', spec: 'Bespoke Grooming & Cut', avatar: '✂️' },
-    { id: 'elena', name: 'Artisan Elena', rating: '4.9 ★', spec: 'Facial Therapy & Skin', avatar: '💆' },
-    { id: 'arthur', name: 'Barber Arthur', rating: '5.0 ★', spec: 'Hot Towel Shave & Beard', avatar: '💈' },
+    { id: 'julian', name: isRTL ? 'مصفف الشعر جوليان' : 'Master Stylist Julian', rating: '5.0 ★', spec: isRTL ? 'تصفيف وقص احترافي' : 'Bespoke Grooming & Cut', avatar: '✂️' },
+    { id: 'elena', name: isRTL ? 'أخصائية البشرة إيلينا' : 'Artisan Elena', rating: '4.9 ★', spec: isRTL ? 'علاج وتغذية البشرة' : 'Facial Therapy & Skin', avatar: '💆' },
+    { id: 'arthur', name: isRTL ? 'الحلاق الملكي آرثر' : 'Barber Arthur', rating: '5.0 ★', spec: isRTL ? 'حلاقة كلاسيكية ولحية' : 'Hot Towel Shave & Beard', avatar: '💈' },
   ];
 
   return (
-    <div className="min-h-full w-full bg-[#F8F9FF] dark:bg-[#0F172A] text-[#121C2A] dark:text-white flex flex-col justify-between transition-colors pb-12">
+    <div className="min-h-full w-full bg-[#F8F9FF] dark:bg-[#0F172A] text-[#121C2A] dark:text-white flex flex-col justify-between transition-colors pb-12" dir={isRTL ? 'rtl' : 'ltr'}>
       
       {/* Recurring Header */}
       <RecurringAppHeader 
@@ -49,7 +56,7 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
         onNavigate={onNavigate} 
         lang={lang} 
         title="Mr. Butler"
-        statusMessage="Private salon stylists ready for in-home or suite appointments."
+        statusMessage={isRTL ? "خبراء التجميل والتصفيف جاهزون لزيارتكم في الجناح الخاص." : "Private salon stylists ready for in-home or suite appointments."}
       />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
@@ -58,30 +65,35 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
         <div className="flex items-center justify-between">
           <button
             onClick={() => onNavigate('our_services')}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#00444D] dark:text-[#ABEDFA] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#00444D] dark:text-[#ABEDFA] hover:underline cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Services</span>
+            {isRTL ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
+            <span>{isRTL ? 'العودة للخدمات' : 'Back to Services'}</span>
           </button>
           <span className="text-[11px] font-mono text-slate-400">
-            Beauty & Grooming Salon
+            {isRTL ? 'صالون التجميل والعناية الشخصية' : 'Beauty & Grooming Salon'}
           </span>
         </div>
 
         <div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#00444D] dark:text-white tracking-tight">
-            Beauty & Grooming Suites
+            {isRTL ? 'خدمات صالون التجميل والعناية' : 'Beauty Salon Services'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Personalized grooming, rejuvenating skin treatments, and hair styling in the comfort of your home or private suite.
+            {isRTL ? 'عناية شخصية فائقة، علاجات تجديد البشرة، وتصفيف الشعر في راحة منزلك أو جناحك الخاص.' : 'Personalized grooming, rejuvenating skin treatments, and hair styling in the comfort of your home or private suite.'}
           </p>
         </div>
 
-        {/* 1. Treatment Menu (Bento Grid) */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
-            1. Select Treatment
-          </label>
+        {/* 1. Select Service (Choose beauty service) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '١. اختيار الخدمة' : '1. Select Service'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'اختر جلسة العناية' : 'Choose beauty service'}
+            </span>
+          </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {treatments.map(item => {
@@ -91,14 +103,14 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
                 <button
                   key={item.id}
                   onClick={() => setSelectedTreatment(item.id)}
-                  className={`p-4 rounded-2xl border text-left flex items-start justify-between gap-3 transition-all ${
+                  className={`p-4 rounded-2xl border text-left rtl:text-right flex items-start justify-between gap-3 transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#00444D] text-white border-[#00444D] shadow-md'
                       : 'bg-white dark:bg-slate-900 border-[#E2E8F0] dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:bg-[#EFF4FF]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-white/20 text-[#FFE088]' : 'bg-[#EFF4FF] dark:bg-slate-800 text-[#00444D] dark:text-[#ABEDFA]'}`}>
+                    <div className={`p-2.5 rounded-xl shrink-0 ${isSelected ? 'bg-white/20 text-[#FFE088]' : 'bg-[#EFF4FF] dark:bg-slate-800 text-[#00444D] dark:text-[#ABEDFA]'}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
@@ -108,7 +120,7 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
                       </p>
                     </div>
                   </div>
-                  <span className={`font-bold text-xs ${isSelected ? 'text-[#FFE088]' : 'text-[#00444D] dark:text-[#ABEDFA]'}`}>
+                  <span className={`font-bold text-xs shrink-0 ${isSelected ? 'text-[#FFE088]' : 'text-[#00444D] dark:text-[#ABEDFA]'}`}>
                     {item.price}
                   </span>
                 </button>
@@ -117,13 +129,15 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
           </div>
         </div>
 
-        {/* 2. Choose Stylist */}
-        <div className="space-y-2">
+        {/* 2. Select Professional (Choose your professional) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
-              2. Choose Stylist or Specialist
-            </label>
-            <span className="text-[11px] text-slate-400">Available on Demand</span>
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '٢. اختيار الأخصائي أو المصفف' : '2. Select Professional'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'متاح حسب الطلب' : 'Choose your professional'}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -133,9 +147,9 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
                 <button
                   key={stylist.id}
                   onClick={() => setSelectedStylist(stylist.id)}
-                  className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-2 ${
+                  className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-2 cursor-pointer ${
                     isSelected
-                      ? 'bg-[#E6EEFF] dark:bg-slate-800 border-[#00444D] dark:border-[#ABEDFA] shadow-sm'
+                      ? 'bg-[#E6EEFF] dark:bg-slate-800 border-[#00444D] dark:border-[#ABEDFA] shadow-xs'
                       : 'bg-white dark:bg-slate-900 border-[#E2E8F0] dark:border-slate-800'
                   }`}
                 >
@@ -157,63 +171,104 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
           </div>
         </div>
 
-        {/* 3. Location Preference */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
-            3. Service Location
-          </label>
+        {/* 3. Select Date & Time (Choose appointment time) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '٣. تحديد التاريخ والوقت' : '3. Select Date & Time'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'اختر وقت الجلسة' : 'Choose appointment time'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DatePicker
+              label={isRTL ? 'تاريخ الموعد' : 'Appointment Date'}
+              value={date}
+              onChange={setDate}
+              isRTL={isRTL}
+            />
+            <TimePicker
+              label={isRTL ? 'الوقت المفضل' : 'Preferred Time'}
+              value={time}
+              onChange={setTime}
+              isRTL={isRTL}
+            />
+          </div>
+        </div>
+
+        {/* 4. Location (Choose service location) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '٤. موقع الجلسة والعنوان' : '4. Location'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'حدد المكان' : 'Choose service location'}
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={() => setLocationType('home')}
-              className={`p-4 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+              className={`p-4 rounded-2xl border text-left rtl:text-right flex items-start gap-3 transition-all cursor-pointer ${
                 locationType === 'home'
                   ? 'bg-[#E6EEFF] dark:bg-slate-800 border-[#00444D] dark:border-[#ABEDFA]'
                   : 'bg-white dark:bg-slate-900 border-[#E2E8F0] dark:border-slate-800'
               }`}
             >
-              <div className="p-2 rounded-xl bg-[#00444D] text-white">
+              <div className="p-2 rounded-xl bg-[#00444D] text-white shrink-0">
                 <Home className="w-5 h-5" />
               </div>
               <div>
                 <span className="font-bold text-xs text-slate-800 dark:text-white block">
-                  Private In-Home Session
+                  {isRTL ? 'جلسة خاصة في المسكن / الجناح' : 'Private In-Home Session'}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Stylist brings sanitized tools & luxury chair protective coverings.
+                  {isRTL ? 'يحضر المصفف مع كافة الأدوات المعقمة ومستحضرات العناية الفاخرة.' : 'Stylist brings sanitized tools & luxury chair protective coverings.'}
                 </span>
               </div>
             </button>
 
             <button
               onClick={() => setLocationType('suite')}
-              className={`p-4 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+              className={`p-4 rounded-2xl border text-left rtl:text-right flex items-start gap-3 transition-all cursor-pointer ${
                 locationType === 'suite'
                   ? 'bg-[#E6EEFF] dark:bg-slate-800 border-[#00444D] dark:border-[#ABEDFA]'
                   : 'bg-white dark:bg-slate-900 border-[#E2E8F0] dark:border-slate-800'
               }`}
             >
-              <div className="p-2 rounded-xl bg-[#00444D] text-white">
+              <div className="p-2 rounded-xl bg-[#00444D] text-white shrink-0">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
                 <span className="font-bold text-xs text-slate-800 dark:text-white block">
-                  VIP Salon Partner Suite
+                  {isRTL ? 'جناح الصالون الخاص VIP' : 'VIP Partner Salon Suite'}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Reserved private booth with beverage service & spa amenities.
+                  {isRTL ? 'مقصورة حصرية مخصصة لك مع خدمات الضيافة والسبا الكاملة.' : 'Reserved private booth with beverage service & spa amenities.'}
                 </span>
               </div>
             </button>
           </div>
+
+          <AddressInput
+            label={isRTL ? 'عنوان موقع الجلسة' : 'Service Address'}
+            value={address}
+            onChange={setAddress}
+            isRTL={isRTL}
+          />
         </div>
 
-        {/* Action Button */}
+        {/* Action Button: Continue */}
         <div className="pt-2">
           <button
             onClick={() => setIsBooked(true)}
-            className="w-full bg-[#00444D] hover:bg-[#0D5D68] text-white font-semibold text-sm py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 border-b-2 border-[#CCA730]"
+            className="w-full bg-[#00444D] hover:bg-[#0D5D68] text-white font-semibold text-base py-4 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 border-b-2 border-[#CCA730] cursor-pointer group active:scale-[0.99]"
           >
-            <span>Confirm Beauty Appointment</span>
+            <span>{isRTL ? 'المتابعة' : 'Continue'}</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#FFE088]" />
           </button>
         </div>
 
@@ -222,15 +277,17 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
       {/* Confirmation Modal */}
       {isBooked && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-[#CCA730] shadow-2xl">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 border border-[#CCA730] shadow-2xl animate-fadeIn">
             <div className="w-14 h-14 rounded-full bg-[#B0EDF4] dark:bg-teal-950 mx-auto flex items-center justify-center text-[#00444D] dark:text-[#ABEDFA]">
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <h3 className="font-serif text-xl font-bold text-[#00444D] dark:text-white">
-              Appointment Reserved!
+              {isRTL ? 'تم تأكيد موعد العناية!' : 'Appointment Reserved!'}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300">
-              Your appointment with {stylists.find(s => s.id === selectedStylist)?.name} is confirmed. Session type: {locationType === 'home' ? 'In-Home Session' : 'VIP Suite'}.
+              {isRTL 
+                ? `تم حجز موعدك مع ${stylists.find(s => s.id === selectedStylist)?.name} بتاريخ ${date} في ${time}.`
+                : `Your appointment with ${stylists.find(s => s.id === selectedStylist)?.name} is confirmed on ${date} during ${time}.`}
             </p>
             <div className="pt-2">
               <button
@@ -238,9 +295,9 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
                   setIsBooked(false);
                   onNavigate('our_services');
                 }}
-                className="w-full py-2.5 bg-[#00444D] text-white rounded-xl font-semibold text-xs shadow"
+                className="w-full py-3 bg-[#00444D] text-white rounded-xl font-semibold text-xs shadow cursor-pointer"
               >
-                Back to Services Directory
+                {isRTL ? 'العودة لدليل الخدمات' : 'Back to Services Directory'}
               </button>
             </div>
           </div>
@@ -250,3 +307,4 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ on
     </div>
   );
 };
+

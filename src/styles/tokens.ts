@@ -80,7 +80,7 @@ export const DESIGN_TOKENS = {
     surfaceTint: '#1e6772',
   },
   typography: {
-    fontDisplay: "'Libre Caslon Text', 'Playfair Display', Georgia, serif",
+    fontDisplay: "'Libre Caslon Text', Georgia, serif",
     fontBody: "'Manrope', system-ui, -apple-system, sans-serif",
   },
   spacing: {

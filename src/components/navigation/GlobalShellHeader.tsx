@@ -78,18 +78,42 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
 
   return (
     <>
-      {/* Top Status Notification Banner */}
+      {/* Top Status Notification Banner - Continuous Roller Marquee Tape */}
       {showStatusBar && (
         <aside 
-          aria-label="Dispatch Status Bar" 
+          aria-label="Live Dispatch Status Roller Banner" 
           dir={isRTL ? 'rtl' : 'ltr'}
-          className="w-full bg-[#B0EDF4] dark:bg-[#0D5D68] text-[#00444D] dark:text-[#ABEDFA] py-1.5 px-3 sm:px-4 text-xs flex items-center justify-center font-medium border-b border-[#CCA730]/40 transition-colors shadow-2xs select-none"
+          className="w-full bg-[#B0EDF4] dark:bg-[#0D5D68] text-[#00444D] dark:text-[#ABEDFA] py-0.5 sm:py-1 px-2 text-[10px] sm:text-[11px] font-medium border-b border-[#CCA730]/40 transition-colors shadow-2xs select-none overflow-hidden relative"
         >
-          <div className="flex items-center gap-2 max-w-5xl mx-auto truncate">
-            <Truck className="w-3.5 h-3.5 flex-shrink-0 text-[#00444D] dark:text-[#ABEDFA] animate-pulse" />
-            <span className="font-serif italic tracking-wide truncate">
-              {statusMessage}
-            </span>
+          <div className="w-full overflow-hidden flex items-center">
+            {/* Live Status Badge */}
+            <div className="shrink-0 z-10 bg-[#00444D] dark:bg-[#062c31] text-[#FFE088] px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shadow-2xs mr-1.5 rtl:mr-0 rtl:ml-1.5">
+              <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping inline-block" />
+              <Truck className="w-2.5 h-2.5 flex-shrink-0 text-[#FFE088]" />
+              <span>{isRTL ? "مباشر" : "LIVE"}</span>
+            </div>
+
+            {/* Continuous Marquee Roller Stream */}
+            <div className="overflow-hidden whitespace-nowrap flex-1 flex">
+              <div className={isRTL ? "animate-roller-ticker-rtl" : "animate-roller-ticker"}>
+                {[1, 2, 3].map((idx) => (
+                  <div key={idx} className="flex items-center gap-4 sm:gap-6 px-3 sm:px-4">
+                    <span className="font-serif italic tracking-wide text-[10px] sm:text-[11px]">
+                      {statusMessage}
+                    </span>
+                    <span className="text-[#CCA730] font-bold">•</span>
+                    <span className="font-sans text-[10px] opacity-80">
+                      {isRTL ? "خدمة استلام وتسليم الفاليه الفاخرة على مدار الساعة" : "24/7 Imperial Valet & White-Glove Concierge Dispatch"}
+                    </span>
+                    <span className="text-[#CCA730] font-bold">•</span>
+                    <span className="font-mono text-[9px] bg-white/40 dark:bg-black/20 px-1 py-0.2 rounded font-semibold text-[#00444D] dark:text-[#FFE088]">
+                      {isRTL ? "الوقت المتوقع: ١٤ دقيقة" : "ETA: 14 mins"}
+                    </span>
+                    <span className="text-[#CCA730] font-bold">•</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </aside>
       )}
@@ -97,29 +121,30 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
       {/* Main Persistent Application Shell Header */}
       <header 
         dir={isRTL ? 'rtl' : 'ltr'}
-        className="sticky top-0 z-40 bg-[#F8F9FF]/95 dark:bg-[#0B132B]/95 backdrop-blur-md border-b border-[#D9E3F6] dark:border-slate-800 border-t-2 border-t-[#CCA730]/70 px-2 sm:px-4 md:px-5 py-2 sm:py-2.5 flex items-center justify-between transition-colors shadow-xs select-none"
+        className="sticky top-0 z-40 bg-[#F8F9FF]/95 dark:bg-[#0B132B]/95 backdrop-blur-md border-b border-[#D9E3F6] dark:border-slate-800 border-t-2 border-t-[#CCA730]/70 px-1.5 sm:px-2.5 md:px-4 py-1 sm:py-1.5 flex items-center justify-between transition-colors shadow-2xs select-none gap-1 sm:gap-1.5"
       >
-        {/* Left Lockup: Menu Drawer Trigger + Brand Identity */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        {/* Left Lockup: Hamburger Menu (compact size, aligned with grid) + Mr. Butler Logo in flex-row */}
+        <div className="flex flex-row items-center gap-1 sm:gap-2 shrink-0">
           <button
             onClick={onOpenDrawer}
             aria-label={getLocalizedNavLabel('navMenu', lang)}
-            className="w-10 h-10 rounded-xl text-[#00444D] dark:text-[#ABEDFA] hover:bg-[#E6EEFF] dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#00444D] flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+            title={getLocalizedNavLabel('navMenu', lang)}
+            className="w-7 h-7 sm:w-7.5 sm:h-7.5 min-w-[28px] min-h-[28px] rounded-md text-[#00444D] dark:text-[#ABEDFA] hover:bg-[#E6EEFF] dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-1.5 focus:ring-[#00444D] flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
 
-          {/* Refined Luxury Brand Lockup: Logo + Mr. Butler with Tagline Font */}
+          {/* Refined Luxury Brand Lockup: Logo positioned elegantly beside menu in flex-row with consistent spacing */}
           <button 
             onClick={() => onNavigate('welcome')}
-            className="flex items-center gap-2 sm:gap-2.5 group text-left focus:outline-none cursor-pointer shrink-0"
+            className="flex flex-row items-center gap-1 sm:gap-1.5 group text-left rtl:text-right focus:outline-none cursor-pointer shrink-0"
             aria-label="Mr. Butler Home"
           >
-            <div className="relative shrink-0">
+            <div className="relative shrink-0 flex items-center scale-90 sm:scale-100">
               <EGEC 
-                size="sm" 
+                size="xs" 
                 shape="rounded-full" 
-                withAura={true} 
+                withAura={false} 
                 withSheen={true} 
                 withBeacon={true} 
                 beaconStatus="verified" 
@@ -127,20 +152,17 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
             </div>
             
             <div className="flex flex-col justify-center shrink-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-row items-center gap-1">
                 <span 
-                  className="font-serif text-base sm:text-lg md:text-xl font-black tracking-tight text-[#00444D] dark:text-[#FFE088] group-hover:text-[#0D5D68] dark:group-hover:text-white transition-colors whitespace-nowrap drop-shadow-2xs"
-                  style={{ fontFamily: "'Libre Caslon Text', 'Playfair Display', Georgia, serif" }}
+                  className="font-serif text-xs sm:text-sm md:text-base font-black tracking-tight text-[#00444D] dark:text-[#FFE088] group-hover:text-[#0D5D68] dark:group-hover:text-white transition-colors whitespace-nowrap drop-shadow-2xs leading-none"
+                  style={{ fontFamily: "'Libre Caslon Text', Georgia, serif" }}
                 >
                   {appName}
                 </span>
-                <span className="hidden xl:inline-flex text-[9px] font-mono font-bold uppercase tracking-wider bg-[#FFE088] text-[#241A00] px-1.5 py-0.2 rounded border border-[#CCA730]/40">
+                <span className="hidden xl:inline-flex text-[7px] font-mono font-bold uppercase tracking-wider bg-[#FFE088] text-[#241A00] px-1 py-0.2 rounded border border-[#CCA730]/40">
                   Valet
                 </span>
               </div>
-              <p className="text-[8px] sm:text-[9px] text-[#CCA730] dark:text-[#FFE088]/80 font-mono font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] leading-none mt-0.5 whitespace-nowrap">
-                {isRTL ? "في خدمتكم دائماً" : "Imperial Valet & Concierge"}
-              </p>
             </div>
           </button>
         </div>
@@ -150,7 +172,7 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
           ref={dropdownRef}
           role="navigation"
           aria-label="Main Navigation"
-          className="hidden lg:flex items-center gap-1 bg-[#E6EEFF] dark:bg-slate-800/90 p-1 rounded-full border border-[#D9E3F6] dark:border-slate-700 shadow-inner mx-2"
+          className="hidden lg:flex items-center gap-0.5 bg-[#E6EEFF] dark:bg-slate-800/90 p-0.5 rounded-full border border-[#D9E3F6] dark:border-slate-700 shadow-inner mx-1"
         >
           {RELEASE_1_GLOBAL_NAV.map((section) => {
             const SectionIcon = section.icon;
@@ -177,16 +199,16 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
                   aria-expanded={hasChildren ? isMenuOpen : undefined}
                   aria-haspopup={hasChildren ? 'menu' : undefined}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00444D] cursor-pointer whitespace-nowrap ${
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded-full transition-all flex items-center gap-1 focus:outline-none focus-visible:ring-1.5 focus-visible:ring-[#00444D] cursor-pointer whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#00444D] text-white shadow-xs'
+                      ? 'bg-[#00444D] text-white shadow-2xs'
                       : 'text-[#00444D] dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-700'
                   }`}
                 >
-                  <SectionIcon className="w-3.5 h-3.5" />
+                  <SectionIcon className="w-3 h-3" />
                   <span>{localizedLabel}</span>
                   {hasChildren && (
-                    <ChevronDown className={`w-3 h-3 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-2.5 h-2.5 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
                   )}
                 </button>
 
@@ -195,15 +217,15 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
                   <div 
                     role="menu"
                     aria-label={`${localizedLabel} Submenu`}
-                    className={`absolute top-full mt-1.5 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-[#D9E3F6] dark:border-slate-800 p-2 z-50 animate-fadeIn ${
+                    className={`absolute top-full mt-1 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-[#D9E3F6] dark:border-slate-800 p-1 z-50 animate-fadeIn ${
                       isRTL ? 'right-0' : 'left-0'
                     }`}
                   >
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1 border-b border-slate-100 dark:border-slate-800 mb-1">
+                    <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 px-2 py-0.5 border-b border-slate-100 dark:border-slate-800 mb-0.5">
                       {localizedLabel}
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       {section.children?.map((child: NavChildItem) => {
                         const ChildIcon = child.icon;
                         const isChildActive = currentScreen === child.id;
@@ -216,20 +238,20 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
                               onNavigate(child.id);
                               setActiveDropdown(null);
                             }}
-                            className={`w-full text-left flex items-center justify-between p-2 rounded-xl text-xs transition-all cursor-pointer ${
+                            className={`w-full text-left flex items-center justify-between p-1.2 rounded-md text-[11px] transition-all cursor-pointer ${
                               isChildActive
                                 ? 'bg-[#00444D] text-white font-bold'
                                 : 'text-slate-700 dark:text-slate-200 hover:bg-[#EFF4FF] dark:hover:bg-slate-800'
                             }`}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <ChildIcon className={`w-3.5 h-3.5 flex-shrink-0 ${isChildActive ? 'text-[#FFE088]' : 'text-[#00444D] dark:text-[#ABEDFA]'}`} />
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <ChildIcon className={`w-3 h-3 flex-shrink-0 ${isChildActive ? 'text-[#FFE088]' : 'text-[#00444D] dark:text-[#ABEDFA]'}`} />
                               <span className="truncate">
                                 {getLocalizedNavLabel(child.labelKey, lang)}
                               </span>
                             </div>
                             {child.badge && (
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
+                              <span className={`text-[8px] px-1 py-0.2 rounded font-mono ${
                                 isChildActive 
                                   ? 'bg-white/20 text-white' 
                                   : 'bg-[#B0EDF4] text-[#00444D] dark:bg-slate-800 dark:text-[#ABEDFA]'
@@ -248,31 +270,31 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
           })}
         </nav>
 
-        {/* Right Side: AI Concierge, Notifications, Language Selector + Account Button */}
-        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
-          {/* Butler AI Assistant Button */}
+        {/* Right Side: AI Concierge, Notifications, Language Selector, User Profile */}
+        <div className="flex flex-row items-center gap-1 sm:gap-1.5 shrink-0">
+          {/* Butler AI Concierge Button - Compact on mobile, full label on tablet/desktop */}
           <button
             onClick={onOpenAI}
-            title={isRTL ? "مساعد مستر باتلر الذكي" : "Butler AI Concierge"}
-            aria-label="Open Butler AI Concierge"
-            className="h-9 px-2 sm:px-2.5 rounded-xl bg-gradient-to-r from-[#00444D] to-[#0D5D68] text-[#FFE088] border border-[#CCA730]/40 hover:shadow-md transition-all flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#CCA730] cursor-pointer active:scale-95 shrink-0"
+            title={isRTL ? "خدمة الكونسيرج الذكية" : "Butler Concierge Assistant"}
+            aria-label={isRTL ? "الكونسيرج" : "Concierge"}
+            className="h-7 sm:h-7.5 min-h-[28px] px-1.5 sm:px-2 rounded-md bg-gradient-to-r from-[#00444D] to-[#0D5D68] text-[#FFE088] border border-[#CCA730]/60 hover:border-[#CCA730] hover:shadow-2xs transition-all flex flex-row items-center justify-center gap-1 focus:outline-none focus:ring-1.5 focus:ring-[#CCA730] cursor-pointer active:scale-95 shrink-0 shadow-2xs select-none"
           >
-            <Sparkles className="w-4 h-4 text-[#FFE088] animate-pulse" />
-            <span className="text-xs font-bold hidden sm:inline text-white whitespace-nowrap">
-              {isRTL ? "المساعد" : "Butler AI"}
+            <Sparkles className="w-3 h-3 text-[#FFE088] animate-pulse shrink-0" />
+            <span className="text-[10px] sm:text-[11px] font-bold text-white tracking-wide whitespace-nowrap hidden sm:inline">
+              {isRTL ? "الكونسيرج" : "Concierge"}
             </span>
           </button>
 
-          {/* Notification Center Trigger with Badge */}
+          {/* Notification Center Trigger with Badge - Safely within viewport bounds */}
           <button
             onClick={openNotificationCenter}
             title={isRTL ? "مركز الإشعارات" : "Notification Center"}
             aria-label="Open notification center"
-            className="relative w-9 h-9 rounded-xl text-[#00444D] dark:text-[#ABEDFA] hover:bg-[#E6EEFF] dark:hover:bg-slate-800 transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#00444D] cursor-pointer active:scale-95 shrink-0"
+            className="relative w-7 h-7 sm:w-7.5 sm:h-7.5 min-w-[28px] min-h-[28px] rounded-md text-[#00444D] dark:text-[#ABEDFA] hover:bg-[#E6EEFF] dark:hover:bg-slate-800 transition-colors flex items-center justify-center focus:outline-none focus:ring-1.5 focus:ring-[#00444D] cursor-pointer active:scale-95 shrink-0"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-3.5 h-3.5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 rtl:right-auto rtl:left-1 w-4 h-4 bg-[#CCA730] text-slate-950 font-mono text-[9px] font-bold rounded-full flex items-center justify-center shadow-xs">
+              <span className="absolute top-0 right-0 rtl:right-auto rtl:left-0 w-3 h-3 bg-[#CCA730] text-slate-950 font-mono text-[7px] font-bold rounded-full flex items-center justify-center shadow-2xs">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -290,10 +312,11 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
           <button
             onClick={() => onNavigate('create_account')}
             aria-label={getLocalizedNavLabel('navAccount', lang)}
-            className="h-9 px-2 sm:px-2.5 rounded-xl text-[#00444D] dark:text-[#ABEDFA] hover:bg-[#E6EEFF] dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#00444D] cursor-pointer active:scale-95 shrink-0"
+            title={getLocalizedNavLabel('navAccount', lang)}
+            className="hidden md:flex w-7 h-7 sm:w-auto sm:px-1.5 h-7 min-w-[28px] min-h-[28px] rounded-md text-[#00444D] dark:text-[#ABEDFA] hover:bg-[#E6EEFF] dark:hover:bg-slate-800 transition-colors items-center justify-center sm:gap-1 focus:outline-none focus:ring-1.5 focus:ring-[#00444D] cursor-pointer active:scale-95 shrink-0"
           >
-            <User className="w-4 h-4" />
-            <span className="text-xs font-semibold hidden md:inline whitespace-nowrap">
+            <User className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-semibold hidden md:inline whitespace-nowrap">
               {getLocalizedNavLabel('navAccount', lang)}
             </span>
           </button>

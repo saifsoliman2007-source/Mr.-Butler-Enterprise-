@@ -222,7 +222,8 @@ export async function exportValetReceiptToDrive(
   <meta charset="UTF-8">
   <title>Mr. Butler Imperial Valet - Receipt & Care Certificate</title>
   <style>
-    body { font-family: 'Times New Roman', Georgia, serif; background: #FAF9F6; color: #1e293b; padding: 40px; }
+    body { font-family: 'Manrope', system-ui, -apple-system, sans-serif; background: #FAF9F6; color: #1e293b; padding: 40px; }
+    .title, h1, h2 { font-family: 'Libre Caslon Text', Georgia, serif; }
     .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 32px; border: 1px solid #CCA730; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
     .header { text-align: center; border-bottom: 2px solid #00444D; padding-bottom: 20px; }
     .gold-badge { display: inline-block; background: #FFE088; color: #241A00; padding: 4px 12px; font-size: 11px; font-weight: bold; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; }

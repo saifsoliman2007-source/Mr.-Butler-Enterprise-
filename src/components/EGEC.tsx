@@ -144,7 +144,7 @@ export const EGEC: React.FC<EGECProps> = ({
       {/* Layer 6: Optional Verified Beacon Status */}
       {withBeacon && (
         <span 
-          className={`absolute -bottom-0.5 -right-0.5 ${config.badgeSize} rounded-full ring-white dark:ring-slate-900 ${
+          className={`absolute bottom-0 right-0 ${config.badgeSize} rounded-full ring-white dark:ring-slate-900 ${
             beaconStatus === 'verified' ? 'bg-[#10B981]' : beaconStatus === 'online' ? 'bg-[#3B82F6]' : 'bg-amber-400'
           } shadow-sm animate-pulse`}
           title={`Status: ${beaconStatus}`}

@@ -1,6 +1,6 @@
 {
-  "name": "Mr. Butler Enterprise - Imperial Valet & Concierge Services",
-  "description": "Enterprise-grade authentication, concierge directory, and white-glove booking suite for Mr. Butler Imperial Valet Services.",
+  "name": "Mr. Butler Enterprise",
+  "description": "Enterprise-grade authentication, concierge directory, and white-glove booking suite for Mr. Butler Services.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

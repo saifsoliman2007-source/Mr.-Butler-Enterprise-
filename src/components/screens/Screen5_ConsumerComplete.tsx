@@ -62,15 +62,23 @@ export const Screen5_ConsumerComplete: React.FC<Screen5Props> = ({
           </div>
         </div>
 
-        {/* Action Button: Navigate to Consumer Home */}
-        <div className="pt-2">
+        {/* Action Buttons */}
+        <div className="pt-2 w-full space-y-2.5">
+          <button
+            onClick={() => onNavigate('our_services')}
+            className="w-full py-3.5 px-6 rounded-xl bg-[#00444D] hover:bg-[#0D5D68] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2.5 cursor-pointer min-h-[48px] group active:scale-98 border-b-2 border-[#CCA730]"
+          >
+            <Sparkles className="w-4 h-4 text-[#FFE088]" />
+            <span>{lang === 'ar' ? 'استكشاف دليل الخدمات' : 'Explore Concierge Services'}</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-[#FFE088]" />
+          </button>
+
           <button
             onClick={() => onNavigate('consumer_home')}
-            className="w-full py-3.5 px-6 rounded-xl bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2.5 cursor-pointer min-h-[48px] group active:scale-98"
+            className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] font-semibold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Home className="w-4 h-4 text-[#3B82F6]" />
+            <Home className="w-3.5 h-3.5 text-[#00444D] dark:text-[#ABEDFA]" />
             <span>{t.continueToHome}</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 

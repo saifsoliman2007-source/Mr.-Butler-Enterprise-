@@ -60,37 +60,40 @@ export const Screen4_EmailVerification: React.FC<Screen4Props> = ({
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => onNavigate(3)}
-          className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#475569] dark:text-slate-300 hover:bg-[#F1F5F9] transition flex items-center gap-1.5 text-xs font-semibold"
+          onClick={() => onNavigate('create_account')}
+          className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#475569] dark:text-slate-300 hover:bg-[#F1F5F9] transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-95 shadow-2xs"
         >
-          <ArrowLeft className="w-4 h-4 text-[#3B82F6]" />
+          <ArrowLeft className="w-4 h-4 text-[#00444D] dark:text-[#ABEDFA]" />
           <span>Back</span>
         </button>
 
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#EFF6FF] text-[#1D4ED8] dark:bg-blue-950 dark:text-blue-300 border border-[#E2E8F0] dark:border-blue-800">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#EFF6FF] text-[#00444D] dark:bg-blue-950 dark:text-[#FFE088] border border-[#BFDBFE] dark:border-blue-800">
           Email OTP Step
         </span>
       </div>
 
       {/* Main Verification Container */}
-      <div className="max-w-md w-full mx-auto space-y-6 my-auto text-center">
+      <div className="max-w-md w-full mx-auto space-y-6 my-auto text-center px-2">
         
         {/* Email Badge & Emblem */}
         <div className="space-y-3 flex flex-col items-center">
-          <EGEC size="md" shape="rounded-xl" withAura={true} withSheen={true} withBeacon={true} beaconStatus="online" />
+          <EGEC size="md" shape="rounded-2xl" withAura={true} withSheen={true} withBeacon={true} beaconStatus="online" />
 
-          <h1 className="text-2xl font-bold text-[#0F172A] dark:text-white tracking-tight">
+          <h1 
+            className="text-2xl sm:text-3xl font-bold text-[#00444D] dark:text-white tracking-tight"
+            style={{ fontFamily: "'Libre Caslon Text', Georgia, serif" }}
+          >
             {t.emailVerificationTitle}
           </h1>
 
-          <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-xs text-[#64748B] dark:text-slate-300 space-y-1">
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-xs text-[#64748B] dark:text-slate-300 space-y-1 shadow-xs">
             <p>{t.enterCodeSentTo}</p>
-            <div className="flex items-center justify-center gap-2 font-mono font-bold text-[#1D4ED8] dark:text-blue-400 text-sm">
+            <div className="flex items-center justify-center gap-2 font-mono font-bold text-[#00444D] dark:text-[#ABEDFA] text-sm">
               <span>{email || 'consumer@mrbutler.com'}</span>
               <button
-                onClick={() => onNavigate(3)}
+                onClick={() => onNavigate('create_account')}
                 title={t.changeEmailAddress}
-                className="p-1 rounded hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-[#64748B] hover:text-[#0F172A] transition"
+                className="p-1.5 rounded hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-[#64748B] hover:text-[#00444D] transition cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5" />
               </button>
@@ -135,7 +138,7 @@ export const Screen4_EmailVerification: React.FC<Screen4Props> = ({
         <div className="pt-2">
           <button
             onClick={handleVerify}
-            className="w-full py-3.5 px-6 rounded-xl bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
+            className="w-full py-4 px-6 rounded-2xl bg-[#00444D] hover:bg-[#0D5D68] text-white font-bold text-sm shadow-[0_10px_25px_rgba(0,68,77,0.25)] hover:shadow-[0_15px_35px_rgba(0,68,77,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px] border-b-2 border-[#CCA730]/60 active:scale-[0.99]"
           >
             <span>{t.verifyEmail}</span>
           </button>

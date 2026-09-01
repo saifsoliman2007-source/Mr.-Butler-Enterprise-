@@ -65,7 +65,7 @@ html, body {
 }
 
 h1, h2, h3, .font-serif {
-  font-family: 'Libre Caslon Text', 'Playfair Display', Georgia, serif;
+  font-family: 'Libre Caslon Text', Georgia, serif;
 }
 
 /* Safe Area Utility Classes */
@@ -99,3 +99,40 @@ h1, h2, h3, .font-serif {
   min-height: 44px;
   min-width: 44px;
 }
+
+/* Continuous Roller Marquee Ticker */
+@keyframes tickerRoll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes tickerRollRTL {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(50%);
+  }
+}
+
+.animate-roller-ticker {
+  display: flex;
+  width: max-content;
+  animation: tickerRoll 28s linear infinite;
+}
+
+.animate-roller-ticker-rtl {
+  display: flex;
+  width: max-content;
+  animation: tickerRollRTL 28s linear infinite;
+}
+
+.animate-roller-ticker:hover,
+.animate-roller-ticker-rtl:hover {
+  animation-play-state: paused;
+}
+

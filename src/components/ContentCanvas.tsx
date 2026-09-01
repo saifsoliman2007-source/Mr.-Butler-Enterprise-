@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { DeviceType, Orientation } from '../types';
 import { SAFE_AREA_BASELINE } from '../styles/tokens';
 import { 
@@ -24,6 +24,10 @@ interface ContentCanvasProps {
   simulateHinge?: boolean;
   showSafeOverlay?: boolean;
   isRTL?: boolean;
+  onGoBack?: () => void;
+  onGoForward?: () => void;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
 }
 
 /**
@@ -35,6 +39,7 @@ interface ContentCanvasProps {
  * - Baseline Vertical: Minimum 24dp
  * - Android system bars & iOS safe areas respected via env(safe-area-inset-*)
  * - Browser viewport insets, Foldable hinge clearance, Dynamic keyboard appearance, and Landscape orientation.
+ * - Touch Swipe Gesture Detection for seamless Back / Forward navigation.
  */
 export const ContentCanvas: React.FC<ContentCanvasProps> = ({
   children,
@@ -44,12 +49,71 @@ export const ContentCanvas: React.FC<ContentCanvasProps> = ({
   simulateHinge = false,
   showSafeOverlay = false,
   isRTL = false,
+  onGoBack,
+  onGoForward,
+  onSwipeLeft,
+  onSwipeRight,
 }) => {
   const isTablet = deviceType === 'android_tablet' || deviceType === 'ipad';
   const isDesktop = deviceType === 'desktop';
   const isFoldable = deviceType === 'foldable_folded' || deviceType === 'foldable_unfolded';
   const isUnfoldedFoldable = deviceType === 'foldable_unfolded';
   const isLandscape = orientation === 'landscape';
+
+  // Swipe gesture tracking refs
+  const touchStartCoords = useRef<{ x: number; y: number } | null>(null);
+  const touchStartTime = useRef<number>(0);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      touchStartCoords.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+      touchStartTime.current = Date.now();
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!touchStartCoords.current) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartCoords.current.x;
+    const deltaY = touchEndY - touchStartCoords.current.y;
+    const duration = Date.now() - touchStartTime.current;
+
+    touchStartCoords.current = null;
+
+    // Minimum horizontal swipe distance in px & maximum elapsed time (800ms)
+    const minSwipeDistance = 45;
+    const maxSwipeTime = 800;
+
+    // Verify gesture is primarily horizontal to avoid triggering during vertical scrolling
+    if (
+      Math.abs(deltaX) > minSwipeDistance &&
+      Math.abs(deltaX) > Math.abs(deltaY) * 1.3 &&
+      duration < maxSwipeTime
+    ) {
+      if (deltaX > 0) {
+        // Swipe Right (Gesture moves left to right)
+        onSwipeRight?.();
+        if (isRTL) {
+          onGoForward?.();
+        } else {
+          onGoBack?.();
+        }
+      } else {
+        // Swipe Left (Gesture moves right to left)
+        onSwipeLeft?.();
+        if (isRTL) {
+          onGoBack?.();
+        } else {
+          onGoForward?.();
+        }
+      }
+    }
+  };
 
   // Baseline Horizontal: Mobile 16dp (16px), Tablet 24dp (24px), Desktop 32dp (32px)
   const baselineHorizontal = isDesktop
@@ -77,9 +141,11 @@ export const ContentCanvas: React.FC<ContentCanvasProps> = ({
 
   return (
     <div 
-      className={`relative w-full flex-1 flex flex-col justify-between overflow-x-hidden transition-all duration-300 ${
+      className={`relative w-full flex-1 flex flex-col justify-between overflow-x-hidden transition-all duration-300 touch-pan-y ${
         isRTL ? 'rtl' : 'ltr'
       }`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{
         paddingTop: calculatedPaddingTop,
         paddingBottom: calculatedPaddingBottom,

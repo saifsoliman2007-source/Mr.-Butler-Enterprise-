@@ -122,11 +122,17 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
           </p>
         </div>
 
-        {/* 1. Service Selection using Shared SegmentedControl */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider block">
-            {isRTL ? '١. نوع الخدمة المطلوبة' : '1. Select Care Type'}
-          </label>
+        {/* 1. Select Service (Choose care type & garments) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '١. نوع الخدمة والقطع' : '1. Select Service'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'اختر الغسيل والملابس' : 'Choose care type & garments'}
+            </span>
+          </div>
+
           <SegmentedControl<'dry_clean' | 'wash_fold' | 'ironing'>
             options={[
               { value: 'dry_clean', label: isRTL ? 'تنظيف جاف وكي' : 'Dry Clean & Press' },
@@ -137,32 +143,26 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
             onChange={(val) => setSelectedService(val)}
             isRTL={isRTL}
           />
-        </div>
 
-        {/* 2. Garment Selection Catalog with Counters */}
-        <div className="space-y-3">
-          <label className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider block">
-            {isRTL ? '٢. تحديد الملابس والقطع' : '2. Select Garments & Items'}
-          </label>
-          
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-[#E2E8F0] dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 shadow-xs overflow-hidden">
+          {/* Garment Selection Catalog */}
+          <div className="bg-[#F8F9FF] dark:bg-slate-800/60 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
             {items.map(item => (
-              <div key={item.id} className="p-4 flex items-center justify-between gap-4">
+              <div key={item.id} className="p-3 sm:p-4 flex items-center justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-[#00444D] dark:text-white">
+                    <span className="font-semibold text-xs sm:text-sm text-[#00444D] dark:text-white">
                       {item.name}
                     </span>
                     <span className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA]">
                       ${item.price}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {item.description}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 bg-[#F8F9FF] dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-[#D9E3F6] dark:border-slate-700">
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-[#D9E3F6] dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => updateItemCount(item.id, -1)}
@@ -172,7 +172,7 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="w-6 text-center font-bold text-xs">
+                  <span className="w-5 text-center font-bold text-xs">
                     {item.count}
                   </span>
                   <button
@@ -187,69 +187,91 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
               </div>
             ))}
           </div>
+
+          {/* Starch & Eco Options */}
+          <div className="pt-2 space-y-3">
+            <div>
+              <span className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider block mb-2">
+                {isRTL ? 'درجة النشا' : 'Starch Level'}
+              </span>
+              <SegmentedControl<'none' | 'light' | 'medium' | 'crisp'>
+                options={[
+                  { value: 'none', label: isRTL ? 'بدون نشا' : 'None' },
+                  { value: 'light', label: isRTL ? 'خفيف' : 'Light' },
+                  { value: 'medium', label: isRTL ? 'متوسط' : 'Medium' },
+                  { value: 'crisp', label: isRTL ? 'قوي' : 'Crisp' },
+                ]}
+                value={starchLevel}
+                onChange={(lvl) => setStarchLevel(lvl)}
+                isRTL={isRTL}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <Toggle
+                checked={ecoFriendly}
+                onChange={setEcoFriendly}
+                label={isRTL ? 'مذيبات عضوية' : 'Eco-Organic Solvents'}
+                description={isRTL ? 'خالية من المواد الكيميائية القاسية' : 'Non-toxic, hypoallergenic wash'}
+                isRTL={isRTL}
+              />
+              <Toggle
+                checked={fragranceFree}
+                onChange={setFragranceFree}
+                label={isRTL ? 'بدون عطور' : 'Fragrance-Free'}
+                description={isRTL ? 'ملائم للبشرة الحساسة' : 'Ideal for sensitive skin'}
+                isRTL={isRTL}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* 3. Tailoring & Care Preferences */}
-        <div className="space-y-3">
-          <label className="text-xs font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider block">
-            {isRTL ? '٣. تفضيلات النشا والكي' : '3. Starch & Fabric Preferences'}
-          </label>
-          <SegmentedControl<'none' | 'light' | 'medium' | 'crisp'>
-            options={[
-              { value: 'none', label: isRTL ? 'بدون نشا' : 'None' },
-              { value: 'light', label: isRTL ? 'نشا خفيف' : 'Light' },
-              { value: 'medium', label: isRTL ? 'نشا متوسط' : 'Medium' },
-              { value: 'crisp', label: isRTL ? 'نشا قوي' : 'Crisp' },
-            ]}
-            value={starchLevel}
-            onChange={(lvl) => setStarchLevel(lvl)}
+        {/* 2. Add Photos (Optional) (Upload garment photos) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '٢. إضافة صور الملابس (اختياري)' : '2. Add Photos (Optional)'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'صور للبقع أو تعليمات الغسيل' : 'Upload garment photos'}
+            </span>
+          </div>
+
+          <ImageInput
+            label={isRTL ? 'صورة للبقع أو بطاقة الغسيل الخاصة' : 'Stain Photo or Care Tag Detail'}
+            value={garmentPhoto}
+            onChange={setGarmentPhoto}
+            helperText={isRTL ? 'التقط صورة للبقعة ليتعامل معها خبير الأقمشة بعناية فائقة' : 'Take a photo of specific stains or delicate couture care tags'}
+            isRTL={isRTL}
+          />
+
+          <TextInput
+            label={isRTL ? 'ملاحظات إضافية للفاليه' : 'Special Concierge Notes'}
+            value={specialInstructions}
+            onChange={(e) => setSpecialInstructions(e.target.value)}
+            placeholder={isRTL ? 'مثال: يرجى الانتباه للحرير والياقات...' : 'e.g., Please pay special attention to the lapel on the tuxedo...'}
             isRTL={isRTL}
           />
         </div>
 
-        {/* Eco Options & Toggles */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-[#E2E8F0] dark:border-slate-800 space-y-3 shadow-xs">
-          <Toggle
-            checked={ecoFriendly}
-            onChange={setEcoFriendly}
-            label={isRTL ? 'مذيبات عضوية صديقة للبيئة' : 'Eco-Organic Solvents'}
-            description={isRTL ? 'معالجة لطيفة خالية من السموم والمواد الكيميائية القاسية' : 'Non-toxic, hypo-allergenic garment-safe wash'}
-            isRTL={isRTL}
-          />
+        {/* 3. Select Date & Time (Choose drop-off date & time) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '٣. تحديد موعد الاستلام' : '3. Select Date & Time'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'اختر وقت حضور الفاليه' : 'Choose drop-off date & time'}
+            </span>
+          </div>
 
-          <div className="h-px bg-slate-100 dark:bg-slate-800" />
-
-          <Toggle
-            checked={fragranceFree}
-            onChange={setFragranceFree}
-            label={isRTL ? 'غسيل بدون عطور صناعية' : 'Fragrance-Free Finish'}
-            description={isRTL ? 'ملائم لأصحاب البشرة الحساسة' : 'Ideal for sensitive skin and bespoke silks'}
-            isRTL={isRTL}
-          />
-        </div>
-
-        {/* 4. Service Address Primitive */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-[#E2E8F0] dark:border-slate-800 shadow-xs">
-          <AddressInput
-            label={isRTL ? 'عنوان استلام وتسليم الملابس' : 'Valet Pickup & Delivery Address'}
-            value={address}
-            onChange={setAddress}
-            isRTL={isRTL}
-          />
-        </div>
-
-        {/* 5. Date & Time Picker Primitives */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-[#E2E8F0] dark:border-slate-800 shadow-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DatePicker
               label={isRTL ? 'تاريخ الاستلام' : 'Valet Pickup Date'}
               value={pickupDate}
               onChange={setPickupDate}
               isRTL={isRTL}
             />
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-[#E2E8F0] dark:border-slate-800 shadow-xs">
             <TimePicker
               label={isRTL ? 'الفترة الزمنية للاستلام' : 'Pickup Time Window'}
               value={pickupTime}
@@ -259,54 +281,34 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
           </div>
         </div>
 
-        {/* 6. Garment Photo Upload (Special Instructions) */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-[#E2E8F0] dark:border-slate-800 space-y-4 shadow-xs">
-          <ImageInput
-            label={isRTL ? 'صورة للبقع أو تعليمات الغسيل الخاصة (اختياري)' : 'Stain Photo or Care Tag Detail (Optional)'}
-            value={garmentPhoto}
-            onChange={setGarmentPhoto}
-            helperText={isRTL ? 'التقط صورة للبقعة ليتعامل معها خبير الأقمشة بعناية خاصة' : 'Take a photo of specific stains or delicate couture care tags'}
-            isRTL={isRTL}
-          />
+        {/* 4. Pickup & Delivery (Set pickup & delivery address) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-[#E2E8F0] dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] uppercase tracking-wider">
+              {isRTL ? '٤. الاستلام والتسليم' : '4. Pickup & Delivery'}
+            </h2>
+            <span className="text-[11px] text-slate-400">
+              {isRTL ? 'عنوان الفاليه' : 'Set pickup & delivery address'}
+            </span>
+          </div>
 
-          <TextInput
-            label={isRTL ? 'ملاحظات إضافية للسيد باتلر' : 'Special Concierge Notes'}
-            value={specialInstructions}
-            onChange={(e) => setSpecialInstructions(e.target.value)}
-            placeholder={isRTL ? 'مثال: يرجى وضع علامات خياطة على ياقة القميص الأزرق...' : 'e.g., Please pay special attention to the lapel on the tuxedo...'}
+          <AddressInput
+            label={isRTL ? 'عنوان استلام وتسليم الملابس' : 'Valet Pickup & Delivery Address'}
+            value={address}
+            onChange={setAddress}
             isRTL={isRTL}
           />
         </div>
 
-        {/* Order Summary & Confirm Action */}
-        <div className="bg-gradient-to-br from-white to-[#F8F9FF] dark:from-slate-900 dark:to-slate-800 p-5 sm:p-6 rounded-3xl border border-[#D9E3F6] dark:border-slate-700 space-y-4 shadow-md">
-          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
-            <span>{isRTL ? `القطع المحددة (${totalItems})` : `Selected Items (${totalItems})`}</span>
-            <span className="font-semibold">${subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
-            <span>{isRTL ? 'خدمة الاستلام والتسليم الفاخرة' : 'White-Glove Valet Collection & Delivery'}</span>
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-              {isRTL ? 'مجانية بالكامل' : 'Complimentary'}
-            </span>
-          </div>
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-slate-500 block">
-                {isRTL ? 'إجمالي التكلفة المقدرة' : 'Total Estimate'}
-              </span>
-              <span className="font-serif text-2xl font-bold text-[#00444D] dark:text-white">
-                ${total.toFixed(2)}
-              </span>
-            </div>
-            <button
-              onClick={() => setIsBooked(true)}
-              disabled={totalItems === 0}
-              className="bg-[#00444D] hover:bg-[#0D5D68] text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed border-b-2 border-[#CCA730] cursor-pointer"
-            >
-              {isRTL ? 'تأكيد طلب الاستلام' : 'Confirm Valet Pickup'}
-            </button>
-          </div>
+        {/* Action Button: Continue */}
+        <div className="pt-2">
+          <button
+            onClick={() => setIsBooked(true)}
+            className="w-full bg-[#00444D] hover:bg-[#0D5D68] text-white font-semibold text-base py-4 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 border-b-2 border-[#CCA730] cursor-pointer group active:scale-[0.99]"
+          >
+            <span>{isRTL ? 'المتابعة' : 'Continue'}</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#FFE088]" />
+          </button>
         </div>
 
       </main>

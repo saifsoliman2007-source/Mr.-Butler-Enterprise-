@@ -54,8 +54,10 @@ import { ScreenGoogleDrive } from './components/screens/ScreenGoogleDrive';
 import { BottomNavigationBar } from './components/navigation/BottomNavigationBar';
 
 export default function App() {
-  // Navigation & Role State
+  // Navigation & History State
   const [currentScreen, setCurrentScreen] = useState<ScreenId>('welcome');
+  const [history, setHistory] = useState<ScreenId[]>(['welcome']);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [selectedRole, setSelectedRole] = useState<Role>('consumer');
 
   // Device & Display State
@@ -106,9 +108,15 @@ export default function App() {
     businessAddress: '',
   });
 
-  // Navigation Logger & Announcement Helper
+  // Navigation Logger & Announcement Helper with History Management
   const navigateTo = (screen: ScreenId) => {
     setCurrentScreen(screen);
+    setHistory((prev) => {
+      const upToCurrent = prev.slice(0, historyIndex + 1);
+      return [...upToCurrent, screen];
+    });
+    setHistoryIndex((prev) => prev + 1);
+
     const screenTitle = SCREEN_LABELS[screen] || `Screen ${screen}`;
     const announcement = `Navigated to ${screenTitle}. User role: ${selectedRole}.`;
 
@@ -116,6 +124,24 @@ export default function App() {
       ...prev,
       liveAnnouncements: [...prev.liveAnnouncements.slice(-15), announcement],
     }));
+  };
+
+  const handleGoBack = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      const targetScreen = history[newIndex];
+      setHistoryIndex(newIndex);
+      setCurrentScreen(targetScreen);
+    }
+  };
+
+  const handleGoForward = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      const targetScreen = history[newIndex];
+      setHistoryIndex(newIndex);
+      setCurrentScreen(targetScreen);
+    }
   };
 
   const updateRegistrationData = (data: Partial<RegistrationData>) => {
@@ -150,6 +176,10 @@ export default function App() {
         <TopBar
           currentScreen={currentScreen}
           onScreenChange={navigateTo}
+          onGoBack={handleGoBack}
+          onGoForward={handleGoForward}
+          canGoBack={historyIndex > 0}
+          canGoForward={historyIndex < history.length - 1}
           deviceType={deviceType}
           onDeviceChange={setDeviceType}
           orientation={orientation}
@@ -189,7 +219,9 @@ export default function App() {
               simulateHinge={deviceType === 'foldable_unfolded'}
               showSafeOverlay={showSafeOverlay}
               isRTL={isRTL}
-          >
+              onGoBack={handleGoBack}
+              onGoForward={handleGoForward}
+            >
             {/* Active Screen Rendering */}
             {(currentScreen === 'welcome' || currentScreen === 'welcome') && (
               <ScreenWelcomePortal onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
