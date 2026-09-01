@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   ScreenId, 
   Role, 
-  DeviceType, 
   ThemeMode, 
   Language, 
   FeatureToggles, 
   AccessibilitySettings, 
-  RegistrationData,
-  Orientation
+  RegistrationData
 } from './types';
-import { TopBar, SCREEN_LABELS } from './components/TopBar';
-import { DeviceFrame } from './components/DeviceFrame';
-import { ContentCanvas } from './components/ContentCanvas';
-import { AdminTogglesDrawer } from './components/AdminTogglesDrawer';
-import { AccessibilityDrawer } from './components/AccessibilityDrawer';
-import { DesignSpecsModal } from './components/DesignSpecsModal';
-import { ScreenFlowModal } from './components/ScreenFlowModal';
 import { NotificationProvider } from './context/NotificationContext';
 import { FloatingToastContainer } from './components/notifications/FloatingToastContainer';
 import { NotificationCenterDrawer } from './components/notifications/NotificationCenterDrawer';
@@ -38,7 +29,7 @@ import { Screen11_ResetPassword } from './components/screens/Screen11_ResetPassw
 import { ConsumerHomePreview } from './components/screens/ConsumerHomePreview';
 import { ProviderDashboardPreview } from './components/screens/ProviderDashboardPreview';
 
-// New Screens (Imperial Valet Service Portal Suite)
+// Unified Service Suite Screens
 import { ScreenWelcomePortal } from './components/screens/ScreenWelcomePortal';
 import { ScreenAuthenticationLanding } from './components/screens/ScreenAuthenticationLanding';
 import { ScreenOurServices } from './components/screens/ScreenOurServices';
@@ -53,37 +44,55 @@ import { ScreenFoundation } from './components/screens/ScreenFoundation';
 import { ScreenGoogleDrive } from './components/screens/ScreenGoogleDrive';
 import { BottomNavigationBar } from './components/navigation/BottomNavigationBar';
 
-export default function App() {
-  // Navigation & History State
-  const [currentScreen, setCurrentScreen] = useState<ScreenId>('welcome');
-  const [history, setHistory] = useState<ScreenId[]>(['welcome']);
-  const [historyIndex, setHistoryIndex] = useState<number>(0);
-  const [selectedRole, setSelectedRole] = useState<Role>('consumer');
+// Helper to determine if bottom nav should be displayed
+function shouldShowBottomNav(screen: ScreenId): boolean {
+  const mainScreens = new Set([
+    'welcome',
+    'our_services',
+    'services',
+    'concierge',
+    'concierge_offers',
+    'concierge_recommendations',
+    'concierge_special_requests',
+    'orders',
+    'orders_active',
+    'orders_previous',
+    'orders_details',
+    'foundation',
+    'foundation_enterprise',
+    'foundation_brand',
+    'foundation_components',
+    'foundation_design',
+    'foundation_accessibility',
+    'consumer_home',
+    'provider_dashboard',
+  ]);
+  return mainScreens.has(String(screen));
+}
 
-  // Device & Display State
-  const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
-  const [orientation, setOrientation] = useState<Orientation>('portrait');
-  const [simulateKeyboard, setSimulateKeyboard] = useState<boolean>(false);
-  const [showSafeOverlay, setShowSafeOverlay] = useState<boolean>(false);
-  const [showFrame, setShowFrame] = useState<boolean>(false);
-  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
+export default function App() {
+  // Navigation & History State synchronized with Browser & Mobile History
+  const [currentScreen, setCurrentScreen] = useState<ScreenId>(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) return hash as ScreenId;
+    return 'welcome';
+  });
+
+  const [selectedRole, setSelectedRole] = useState<Role>('consumer');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const [language, setLanguage] = useState<Language>('en');
 
-  // Drawer / Modal Modals
-  const [isAdminTogglesOpen, setIsAdminTogglesOpen] = useState(false);
-  const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
-  const [isDesignSpecsOpen, setIsDesignSpecsOpen] = useState(false);
-  const [isScreenFlowOpen, setIsScreenFlowOpen] = useState(false);
+  // Drawers
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
 
-  // Feature Toggles (Administrator Policies)
-  const [featureToggles, setFeatureToggles] = useState<FeatureToggles>({
+  // Feature Toggles
+  const [featureToggles] = useState<FeatureToggles>({
     googleAuth: true,
     facebookAuth: true,
     appleAuth: true,
     emailReg: true,
     emailOtp: true,
-    phoneOtp: false, // Disabled by default per spec
+    phoneOtp: false,
   });
 
   // Accessibility Settings
@@ -92,9 +101,7 @@ export default function App() {
     highContrast: false,
     fontSizeScale: 100,
     screenReaderActive: true,
-    liveAnnouncements: [
-      'Mr. Butler Enterprise initialized. Active screen: Screen 0 Splash.',
-    ],
+    liveAnnouncements: [],
   });
 
   // User Registration State
@@ -108,41 +115,29 @@ export default function App() {
     businessAddress: '',
   });
 
-  // Navigation Logger & Announcement Helper with History Management
-  const navigateTo = (screen: ScreenId) => {
+  // Navigate to screen with full Android & iOS history integration
+  const navigateTo = useCallback((screen: ScreenId) => {
     setCurrentScreen(screen);
-    setHistory((prev) => {
-      const upToCurrent = prev.slice(0, historyIndex + 1);
-      return [...upToCurrent, screen];
-    });
-    setHistoryIndex((prev) => prev + 1);
+    window.history.pushState({ screen }, '', `#${screen}`);
+    
+    // Scroll window smoothly to top on navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-    const screenTitle = SCREEN_LABELS[screen] || `Screen ${screen}`;
-    const announcement = `Navigated to ${screenTitle}. User role: ${selectedRole}.`;
+  // Listen to native Android Back button, iOS swipe back, and Browser Back/Forward
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.screen) {
+        setCurrentScreen(event.state.screen);
+      } else {
+        const hash = window.location.hash.replace('#', '');
+        setCurrentScreen(hash ? (hash as ScreenId) : 'welcome');
+      }
+    };
 
-    setAccessibilitySettings((prev) => ({
-      ...prev,
-      liveAnnouncements: [...prev.liveAnnouncements.slice(-15), announcement],
-    }));
-  };
-
-  const handleGoBack = () => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      const targetScreen = history[newIndex];
-      setHistoryIndex(newIndex);
-      setCurrentScreen(targetScreen);
-    }
-  };
-
-  const handleGoForward = () => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      const targetScreen = history[newIndex];
-      setHistoryIndex(newIndex);
-      setCurrentScreen(targetScreen);
-    }
-  };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const updateRegistrationData = (data: Partial<RegistrationData>) => {
     setRegistrationData((prev) => ({ ...prev, ...data }));
@@ -161,338 +156,277 @@ export default function App() {
   // Handle Arabic RTL
   const isRTL = language === 'ar';
 
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [isRTL, language]);
+
   return (
     <NotificationProvider>
       <div 
-        className={`min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] text-[#1E293B] dark:text-slate-100 flex flex-col font-sans transition-all duration-300 ${
-          accessibilitySettings.highContrast ? 'contrast-125 saturate-150 ring-2 ring-[#3B82F6]' : ''
+        className={`min-h-screen w-full bg-[#F8FAFC] dark:bg-[#0B1120] text-[#1E293B] dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 overflow-x-hidden ${
+          accessibilitySettings.highContrast ? 'contrast-125 saturate-150 ring-1 ring-[#00444D]' : ''
         }`}
         style={{
           fontSize: `${accessibilitySettings.fontSizeScale}%`,
-          direction: isRTL ? 'rtl' : 'ltr',
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 0px)',
+          paddingLeft: 'max(env(safe-area-inset-left, 0px), 0px)',
+          paddingRight: 'max(env(safe-area-inset-right, 0px), 0px)',
         }}
+        dir={isRTL ? 'rtl' : 'ltr'}
       >
-        {/* Top Header Bar */}
-        <TopBar
-          currentScreen={currentScreen}
-          onScreenChange={navigateTo}
-          onGoBack={handleGoBack}
-          onGoForward={handleGoForward}
-          canGoBack={historyIndex > 0}
-          canGoForward={historyIndex < history.length - 1}
-          deviceType={deviceType}
-          onDeviceChange={setDeviceType}
-          orientation={orientation}
-          onToggleOrientation={() => setOrientation(prev => prev === 'portrait' ? 'landscape' : 'portrait')}
-          simulateKeyboard={simulateKeyboard}
-          onToggleKeyboard={() => setSimulateKeyboard(prev => !prev)}
-          showSafeOverlay={showSafeOverlay}
-          onToggleSafeOverlay={() => setShowSafeOverlay(prev => !prev)}
-          themeMode={themeMode}
-          onThemeChange={setThemeMode}
-          language={language}
-          onLanguageChange={setLanguage}
-          showFrame={showFrame}
-          onToggleFrame={() => setShowFrame(!showFrame)}
-          onOpenAdminToggles={() => setIsAdminTogglesOpen(true)}
-          onOpenAccessibility={() => setIsAccessibilityOpen(true)}
-          onOpenDesignSpecs={() => setIsDesignSpecsOpen(true)}
-          onOpenScreenFlow={() => setIsScreenFlowOpen(true)}
-          onOpenAI={() => setIsAIAssistantOpen(true)}
-        />
-
-        {/* Main Workspace Frame */}
-        <main className="flex-1 flex flex-col items-center justify-start relative overflow-x-hidden w-full bg-[#F1F5F9] dark:bg-[#0B1120] p-2 sm:p-4 md:p-6 lg:p-8">
+        {/* Main Responsive Viewport Container */}
+        <main className="flex-1 flex flex-col w-full min-h-0 relative">
           
-          <DeviceFrame
-            deviceType={deviceType}
-            orientation={orientation}
-            showFrame={showFrame}
-            onDeviceChange={setDeviceType}
-            onToggleFrame={() => setShowFrame(!showFrame)}
-          >
-            {/* Content Canvas (Enterprise Safe Area Standard: 16dp Mobile, 24dp Tablet, 32dp Desktop, 24dp min vertical) */}
-            <ContentCanvas
-              deviceType={deviceType}
-              orientation={orientation}
-              simulateKeyboard={simulateKeyboard}
-              simulateHinge={deviceType === 'foldable_unfolded'}
-              showSafeOverlay={showSafeOverlay}
-              isRTL={isRTL}
-              onGoBack={handleGoBack}
-              onGoForward={handleGoForward}
-            >
-            {/* Active Screen Rendering */}
-            {(currentScreen === 'welcome' || currentScreen === 'welcome') && (
-              <ScreenWelcomePortal onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {/* Active Screen Rendering */}
+          {currentScreen === 'welcome' && (
+            <ScreenWelcomePortal onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'create_account' && (
-              <ScreenAuthenticationLanding
-                formData={registrationData}
-                onUpdateFormData={updateRegistrationData}
-                onNavigate={navigateTo}
-                lang={language}
-                onLanguageChange={setLanguage}
-              />
-            )}
+          {currentScreen === 'create_account' && (
+            <ScreenAuthenticationLanding
+              formData={registrationData}
+              onUpdateFormData={updateRegistrationData}
+              onNavigate={navigateTo}
+              lang={language}
+              onLanguageChange={setLanguage}
+            />
+          )}
 
-            {currentScreen === 'verify_email' && (
-              <Screen4_EmailVerification
-                email={registrationData.email}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 'verify_email' && (
+            <Screen4_EmailVerification
+              email={registrationData.email}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {(currentScreen === 'our_services' || currentScreen === 'services') && (
-              <ScreenOurServices onNavigate={navigateTo} lang={language} />
-            )}
+          {(currentScreen === 'our_services' || currentScreen === 'services') && (
+            <ScreenOurServices onNavigate={navigateTo} lang={language} />
+          )}
 
-            {currentScreen === 'book_dry_cleaning' && (
-              <ScreenBookDryCleaning onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'book_dry_cleaning' && (
+            <ScreenBookDryCleaning onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'book_tailoring' && (
-              <ScreenBookTailoring onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'book_tailoring' && (
+            <ScreenBookTailoring onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'book_shoe_repair' && (
-              <ScreenBookShoeRepair onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'book_shoe_repair' && (
+            <ScreenBookShoeRepair onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'book_beauty_salon' && (
-              <ScreenBookBeautySalon onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'book_beauty_salon' && (
+            <ScreenBookBeautySalon onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'book_pet_care' && (
-              <ScreenBookPetCare onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'book_pet_care' && (
+            <ScreenBookPetCare onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {/* Concierge Routes */}
-            {currentScreen === 'concierge' && (
-              <ScreenConcierge subSection="overview" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {/* Concierge Routes */}
+          {currentScreen === 'concierge' && (
+            <ScreenConcierge subSection="overview" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'concierge_offers' && (
-              <ScreenConcierge subSection="offers" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'concierge_offers' && (
+            <ScreenConcierge subSection="offers" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'concierge_recommendations' && (
-              <ScreenConcierge subSection="recommendations" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'concierge_recommendations' && (
+            <ScreenConcierge subSection="recommendations" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'concierge_special_requests' && (
-              <ScreenConcierge subSection="special_requests" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'concierge_special_requests' && (
+            <ScreenConcierge subSection="special_requests" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'google_drive' && (
-              <ScreenGoogleDrive onNavigate={navigateTo} />
-            )}
+          {currentScreen === 'google_drive' && (
+            <ScreenGoogleDrive onNavigate={navigateTo} />
+          )}
 
-            {/* Orders Routes */}
-            {currentScreen === 'orders' && (
-              <ScreenOrders subSection="overview" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {/* Orders Routes */}
+          {currentScreen === 'orders' && (
+            <ScreenOrders subSection="overview" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'orders_active' && (
-              <ScreenOrders subSection="active" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'orders_active' && (
+            <ScreenOrders subSection="active" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'orders_previous' && (
-              <ScreenOrders subSection="previous" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'orders_previous' && (
+            <ScreenOrders subSection="previous" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'orders_details' && (
-              <ScreenOrders subSection="details" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'orders_details' && (
+            <ScreenOrders subSection="details" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {/* Foundation Routes */}
-            {currentScreen === 'foundation' && (
-              <ScreenFoundation subSection="overview" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {/* Foundation Routes */}
+          {currentScreen === 'foundation' && (
+            <ScreenFoundation subSection="overview" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'foundation_enterprise' && (
-              <ScreenFoundation subSection="enterprise" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'foundation_enterprise' && (
+            <ScreenFoundation subSection="enterprise" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'foundation_brand' && (
-              <ScreenFoundation subSection="brand" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'foundation_brand' && (
+            <ScreenFoundation subSection="brand" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'foundation_components' && (
-              <ScreenFoundation subSection="components" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'foundation_components' && (
+            <ScreenFoundation subSection="components" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'foundation_design' && (
-              <ScreenFoundation subSection="design" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'foundation_design' && (
+            <ScreenFoundation subSection="design" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 'foundation_accessibility' && (
-              <ScreenFoundation subSection="accessibility" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
-            )}
+          {currentScreen === 'foundation_accessibility' && (
+            <ScreenFoundation subSection="accessibility" onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+          )}
 
-            {currentScreen === 0 && (
-              <Screen0_Splash onNavigate={navigateTo} lang={language} />
-            )}
+          {currentScreen === 0 && (
+            <Screen0_Splash onNavigate={navigateTo} lang={language} />
+          )}
 
-            {currentScreen === 1 && (
-              <Screen1_Welcome
-                onSelectRole={(r) => {
-                  setSelectedRole(r);
-                  setRegistrationData((prev) => ({ ...prev, role: r }));
-                }}
-                onNavigate={navigateTo}
-                lang={language}
-                onLanguageChange={setLanguage}
-              />
-            )}
+          {currentScreen === 1 && (
+            <Screen1_Welcome
+              onSelectRole={(r) => {
+                setSelectedRole(r);
+                setRegistrationData((prev) => ({ ...prev, role: r }));
+              }}
+              onNavigate={navigateTo}
+              lang={language}
+              onLanguageChange={setLanguage}
+            />
+          )}
 
-            {currentScreen === 2 && (
-              <Screen2_RegMethod
-                role={selectedRole}
-                toggles={featureToggles}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 2 && (
+            <Screen2_RegMethod
+              role={selectedRole}
+              toggles={featureToggles}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 3 && (
-              <Screen3_ConsumerReg
-                formData={registrationData}
-                onUpdateFormData={updateRegistrationData}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 3 && (
+            <Screen3_ConsumerReg
+              formData={registrationData}
+              onUpdateFormData={updateRegistrationData}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 4 && (
-              <Screen4_EmailVerification
-                email={registrationData.email}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 4 && (
+            <Screen4_EmailVerification
+              email={registrationData.email}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 5 && (
-              <Screen5_ConsumerComplete
-                email={registrationData.email}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 5 && (
+            <Screen5_ConsumerComplete
+              email={registrationData.email}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 6 && (
-              <Screen6_ProviderReg
-                formData={registrationData}
-                onUpdateFormData={updateRegistrationData}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 6 && (
+            <Screen6_ProviderReg
+              formData={registrationData}
+              onUpdateFormData={updateRegistrationData}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 7 && (
-              <Screen7_ProviderVerification
-                email={registrationData.email}
-                businessName={registrationData.businessName}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 7 && (
+            <Screen7_ProviderVerification
+              email={registrationData.email}
+              businessName={registrationData.businessName}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 8 && (
-              <Screen8_ProviderComplete
-                email={registrationData.email}
-                businessName={registrationData.businessName}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 8 && (
+            <Screen8_ProviderComplete
+              email={registrationData.email}
+              businessName={registrationData.businessName}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 9 && (
-              <Screen9_SignIn
-                role={selectedRole}
-                toggles={featureToggles}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 9 && (
+            <Screen9_SignIn
+              role={selectedRole}
+              toggles={featureToggles}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 10 && (
-              <Screen10_ForgotPassword
-                email={registrationData.email}
-                onUpdateEmail={(email) => updateRegistrationData({ email })}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 10 && (
+            <Screen10_ForgotPassword
+              email={registrationData.email}
+              onUpdateEmail={(email) => updateRegistrationData({ email })}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 11 && (
-              <Screen11_ResetPassword
-                email={registrationData.email}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 11 && (
+            <Screen11_ResetPassword
+              email={registrationData.email}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 'consumer_home' && (
-              <ConsumerHomePreview
-                email={registrationData.email}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
+          {currentScreen === 'consumer_home' && (
+            <ConsumerHomePreview
+              email={registrationData.email}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
 
-            {currentScreen === 'provider_dashboard' && (
-              <ProviderDashboardPreview
-                email={registrationData.email}
-                businessName={registrationData.businessName}
-                onNavigate={navigateTo}
-                lang={language}
-              />
-            )}
-          </ContentCanvas>
-        </DeviceFrame>
+          {currentScreen === 'provider_dashboard' && (
+            <ProviderDashboardPreview
+              email={registrationData.email}
+              businessName={registrationData.businessName}
+              onNavigate={navigateTo}
+              lang={language}
+            />
+          )}
+        </main>
 
-      </main>
+        {/* Global Bottom Navigation Bar for Core Consumer Flow */}
+        {shouldShowBottomNav(currentScreen) && (
+          <BottomNavigationBar
+            currentScreen={currentScreen}
+            onNavigate={navigateTo}
+            lang={language}
+          />
+        )}
 
-      {/* Drawers & Modals */}
-      <AdminTogglesDrawer
-        isOpen={isAdminTogglesOpen}
-        onClose={() => setIsAdminTogglesOpen(false)}
-        toggles={featureToggles}
-        onToggleChange={setFeatureToggles}
-      />
-
-      <AccessibilityDrawer
-        isOpen={isAccessibilityOpen}
-        onClose={() => setIsAccessibilityOpen(false)}
-        settings={accessibilitySettings}
-        onSettingsChange={setAccessibilitySettings}
-      />
-
-      <DesignSpecsModal
-        isOpen={isDesignSpecsOpen}
-        onClose={() => setIsDesignSpecsOpen(false)}
-      />
-
-      <ScreenFlowModal
-        isOpen={isScreenFlowOpen}
-        onClose={() => setIsScreenFlowOpen(false)}
-        currentScreen={currentScreen}
-        onSelectScreen={navigateTo}
-        lang={language}
-      />
-
-      {/* Global Enterprise Notification Drawers & Toast Overlay */}
-      <FloatingToastContainer onNavigate={navigateTo} lang={language} />
-      <NotificationCenterDrawer onNavigate={navigateTo} lang={language} />
-      <AIAssistantDrawer
-        isOpen={isAIAssistantOpen}
-        onClose={() => setIsAIAssistantOpen(false)}
-        onNavigate={navigateTo}
-        lang={language}
-      />
+        {/* Global Enterprise Notification Drawers & Toast Overlay */}
+        <FloatingToastContainer onNavigate={navigateTo} lang={language} />
+        <NotificationCenterDrawer onNavigate={navigateTo} lang={language} />
+        <AIAssistantDrawer
+          isOpen={isAIAssistantOpen}
+          onClose={() => setIsAIAssistantOpen(false)}
+          onNavigate={navigateTo}
+          lang={language}
+        />
 
       </div>
     </NotificationProvider>
