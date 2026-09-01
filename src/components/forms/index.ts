@@ -12,6 +12,8 @@ export * from './Checkbox';
 export * from './Radio';
 export * from './Toggle';
 export * from './SegmentedControl';
+export * from './ServiceTypeGrid';
+export * from './ItemQuantityStepper';
 export * from './Upload';
 export * from './ImageInput';
 export * from './LanguageSelector';

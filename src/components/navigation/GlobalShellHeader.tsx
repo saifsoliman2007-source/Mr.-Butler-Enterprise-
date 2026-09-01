@@ -43,7 +43,7 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
   onOpenDrawer,
   onOpenAI,
   showStatusBar = true,
-  statusMessage = "Your Butler is en route to Mr. Wayne's residence.",
+  statusMessage,
   title
 }) => {
   const isRTL = lang === 'ar';
@@ -96,18 +96,13 @@ export const GlobalShellHeader: React.FC<GlobalShellHeaderProps> = ({
             {/* Continuous Marquee Roller Stream */}
             <div className="overflow-hidden whitespace-nowrap flex-1 flex">
               <div className={isRTL ? "animate-roller-ticker-rtl" : "animate-roller-ticker"}>
-                {[1, 2, 3].map((idx) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
                   <div key={idx} className="flex items-center gap-4 sm:gap-6 px-3 sm:px-4">
-                    <span className="font-serif italic tracking-wide text-[10px] sm:text-[11px]">
-                      {statusMessage}
-                    </span>
-                    <span className="text-[#CCA730] font-bold">•</span>
-                    <span className="font-sans text-[10px] opacity-80">
-                      {isRTL ? "خدمة استلام وتسليم الفاليه الفاخرة على مدار الساعة" : "24/7 Imperial Valet & White-Glove Concierge Dispatch"}
-                    </span>
-                    <span className="text-[#CCA730] font-bold">•</span>
-                    <span className="font-mono text-[9px] bg-white/40 dark:bg-black/20 px-1 py-0.2 rounded font-semibold text-[#00444D] dark:text-[#FFE088]">
-                      {isRTL ? "الوقت المتوقع: ١٤ دقيقة" : "ETA: 14 mins"}
+                    <span 
+                      className="font-serif italic tracking-wide text-[10px] sm:text-[11px] font-medium"
+                      style={{ fontFamily: "'Libre Caslon Text', Georgia, serif" }}
+                    >
+                      {isRTL ? "تأسست لراحتكم — Established For Your Comfort" : "Established For Your Comfort"}
                     </span>
                     <span className="text-[#CCA730] font-bold">•</span>
                   </div>

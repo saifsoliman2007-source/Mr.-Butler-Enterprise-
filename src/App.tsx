@@ -254,19 +254,19 @@ export default function App() {
             )}
 
             {currentScreen === 'book_tailoring' && (
-              <ScreenBookTailoring onNavigate={navigateTo} lang={language} />
+              <ScreenBookTailoring onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
             )}
 
             {currentScreen === 'book_shoe_repair' && (
-              <ScreenBookShoeRepair onNavigate={navigateTo} lang={language} />
+              <ScreenBookShoeRepair onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
             )}
 
             {currentScreen === 'book_beauty_salon' && (
-              <ScreenBookBeautySalon onNavigate={navigateTo} lang={language} />
+              <ScreenBookBeautySalon onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
             )}
 
             {currentScreen === 'book_pet_care' && (
-              <ScreenBookPetCare onNavigate={navigateTo} lang={language} />
+              <ScreenBookPetCare onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
             )}
 
             {/* Concierge Routes */}

@@ -76,7 +76,6 @@ export const ScreenOurServices: React.FC<ScreenOurServicesProps> = ({ onNavigate
         onNavigate={onNavigate} 
         lang={lang} 
         showStatusBar={true}
-        statusMessage={isRTL ? "فريق مستر باتلر جاهز لتلبية كافة طلباتكم الفاخرة." : "Your Butler is en route to Mr. Wayne's residence."}
       />
 
       {/* Main Content Body */}

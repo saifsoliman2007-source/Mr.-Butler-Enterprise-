@@ -94,7 +94,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({
             onClick={() => !disabled && fileInputRef.current?.click()}
             disabled={disabled}
             className={`w-full rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer p-4 ${
-              aspectRatio === 'square' ? 'h-48 sm:h-56' : 'h-32 sm:h-36'
+              aspectRatio === 'square' ? 'min-h-[190px] sm:min-h-[220px]' : 'min-h-[130px] sm:min-h-[140px]'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="p-3 rounded-2xl bg-[#E6EEFF] dark:bg-slate-800 text-[#00444D] dark:text-[#ABEDFA]">

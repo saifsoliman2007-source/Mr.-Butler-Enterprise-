@@ -22,7 +22,7 @@ export const RecurringAppHeader: React.FC<RecurringAppHeaderProps> = ({
   onLanguageChange,
   onOpenAI,
   showStatusBar = true,
-  statusMessage = "Your Butler is en route to Mr. Wayne's residence.",
+  statusMessage,
   title
 }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
