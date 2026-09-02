@@ -15,6 +15,99 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 export type Language = 'en' | 'ar' | 'fr' | 'de' | 'ru' | 'es';
 
+export type ProviderCategory = 
+  | 'Beauty Salon'
+  | 'Laundry & Dry Cleaning'
+  | 'Tailoring'
+  | 'Shoe Fix & Repair'
+  | 'Pet Care';
+
+export type OrderStatus = 
+  | 'NEW'
+  | 'ACCEPTED'
+  | 'CONFIRMED'
+  | 'PICKUP_SCHEDULED'
+  | 'IN_PROGRESS'
+  | 'READY'
+  | 'OUT_FOR_DELIVERY'
+  | 'COMPLETED'
+  | 'CANCELLED';
+
+export type CourierStatus = 
+  | 'Awaiting Pickup'
+  | 'Picked Up'
+  | 'In Service'
+  | 'Ready'
+  | 'Out for Delivery'
+  | 'Delivered';
+
+export interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  notes?: string;
+}
+
+export interface ProviderOrder {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  customerAddress: string;
+  customerDistrict: string;
+  category: ProviderCategory;
+  serviceTitle: string;
+  items: OrderItem[];
+  requestedDateTime: string;
+  deliveryRequirement: 'Valet Pickup & Delivery' | 'In-Store Dropoff';
+  courierStatus?: CourierStatus;
+  estimatedPrice: number;
+  customerNotes?: string;
+  uploadedImages?: string[];
+  status: OrderStatus;
+  statusHistory: { status: OrderStatus; timestamp: string; note?: string }[];
+  specialInstructions?: string;
+  aiSummary?: string;
+  aiDefectObservation?: string;
+  aiSuggestedPricing?: number;
+  aiSuggestedResponse?: string;
+  unreadMessages?: number;
+}
+
+export interface ProviderMessage {
+  id: string;
+  orderId?: string;
+  sender?: 'customer' | 'provider' | 'system' | 'ai';
+  senderRole?: 'customer' | 'provider' | 'system' | 'ai';
+  senderName: string;
+  content?: string;
+  text?: string;
+  translatedContent?: string;
+  timestamp: string;
+  isStatusUpdate?: boolean;
+  isRead?: boolean;
+}
+
+export interface ProviderBusinessProfile {
+  businessName: string;
+  crNumber: string;
+  businessAddress: string;
+  serviceCategory: ProviderCategory;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  operatingHours: string;
+  serviceAreas: string[];
+  pickupDeliveryAvailable: boolean;
+  basePricing: number;
+  verified: boolean;
+  description: string;
+  rating: number;
+  totalOrders: number;
+}
+
 export type ScreenId = 
   | 0  // Splash / Welcome to Mr. Butler
   | 1  // Welcome & Role Selection
@@ -57,9 +150,15 @@ export type ScreenId =
   | 'foundation_components'
   | 'foundation_design'
   | 'foundation_accessibility'
-  // Portals
+  // Consumer Portal
   | 'consumer_home'
-  | 'provider_dashboard';
+  // Provider Flow Screens
+  | 'provider_dashboard'
+  | 'provider_orders'
+  | 'provider_order_details'
+  | 'provider_messages'
+  | 'provider_profile'
+  | 'provider_notifications';
 
 export interface FeatureToggles {
   googleAuth: boolean;
@@ -85,8 +184,15 @@ export interface RegistrationData {
   confirmPassword: string;
   // Provider fields
   businessName?: string;
+  businessNumber?: string; // CR Number
   businessPhone?: string;
   businessAddress?: string;
+  serviceCategory?: ProviderCategory;
+  contactPerson?: string;
+  operatingHours?: string;
+  serviceAreas?: string[];
+  pickupDeliveryAvailable?: boolean;
+  basePricing?: number;
   verificationCode?: string;
 }
 
@@ -108,3 +214,4 @@ export interface ServiceCategory {
   gradient: string;
   tag: string;
 }
+

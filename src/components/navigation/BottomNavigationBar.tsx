@@ -1,27 +1,39 @@
 import React from 'react';
-import { ScreenId, Language } from '../../types';
-import { RELEASE_1_GLOBAL_NAV, getLocalizedNavLabel, isSectionActive } from './NavHierarchy';
+import { ScreenId, Language, Role } from '../../types';
+import { RELEASE_1_GLOBAL_NAV, PROVIDER_GLOBAL_NAV, getLocalizedNavLabel, isSectionActive } from './NavHierarchy';
 
 interface BottomNavigationBarProps {
   currentScreen: ScreenId;
   onNavigate: (screen: ScreenId) => void;
   lang: Language;
+  role?: Role;
 }
 
 /**
- * Global Bottom Navigation Bar (Requirement 11)
- * Uses the 4 Release 1 consumer pillars:
+ * Global Bottom Navigation Bar
+ * Dynamically renders Consumer Navigation or Provider Navigation
+ * 
+ * Consumer Pillars:
  * 1. HOME
- * 2. CONCIERGE
- * 3. ORDERS
- * 4. FOUNDATION
+ * 2. SERVICES
+ * 3. CONCIERGE
+ * 4. ORDERS
+ * 
+ * Provider Pillars:
+ * 1. DASHBOARD
+ * 2. ORDERS
+ * 3. MESSAGES
+ * 4. BUSINESS
  */
 export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
   currentScreen,
   onNavigate,
-  lang
+  lang,
+  role = 'consumer'
 }) => {
   const isRTL = lang === 'ar';
+  const isProviderMode = role === 'provider' || String(currentScreen).startsWith('provider_');
+  const navItems = isProviderMode ? PROVIDER_GLOBAL_NAV : RELEASE_1_GLOBAL_NAV;
 
   return (
     <nav
@@ -34,7 +46,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
       }}
     >
       <div className="flex items-center justify-around px-2 pt-1.5 pb-1 max-w-lg mx-auto">
-        {RELEASE_1_GLOBAL_NAV.map((section) => {
+        {navItems.map((section) => {
           const SectionIcon = section.icon;
           const isActive = isSectionActive(section, currentScreen);
           const localizedTitle = getLocalizedNavLabel(section.labelKey, lang);
@@ -89,3 +101,4 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
     </nav>
   );
 };
+

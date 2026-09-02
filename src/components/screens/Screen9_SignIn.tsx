@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Language, ScreenId, FeatureToggles, Role } from '../../types';
 import { translations } from '../../data/translations';
 import { EGEC } from '../EGEC';
+import { SegmentedControl } from '../forms';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react';
 
 interface Screen9Props {
@@ -12,13 +13,15 @@ interface Screen9Props {
 }
 
 export const Screen9_SignIn: React.FC<Screen9Props> = ({
-  role,
+  role: initialRole,
   toggles,
   onNavigate,
   lang,
 }) => {
   const t = translations[lang] || translations.en;
+  const isRTL = lang === 'ar';
 
+  const [currentRole, setCurrentRole] = useState<Role>(initialRole || 'consumer');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +34,7 @@ export const Screen9_SignIn: React.FC<Screen9Props> = ({
       return;
     }
     // Navigate directly to target role destination
-    onNavigate(role === 'consumer' ? 'consumer_home' : 'provider_dashboard');
+    onNavigate(currentRole === 'consumer' ? 'consumer_home' : 'provider_dashboard');
   };
 
   const hasQuickAccess = toggles.googleAuth || toggles.facebookAuth || toggles.appleAuth;
@@ -66,6 +69,20 @@ export const Screen9_SignIn: React.FC<Screen9Props> = ({
           <p className="text-xs text-[#64748B] dark:text-slate-400">
             {t.signInSubtitle}
           </p>
+
+          {/* Role Switcher */}
+          <div className="w-full max-w-xs mt-3">
+            <SegmentedControl<Role>
+              size="sm"
+              options={[
+                { value: 'consumer', label: isRTL ? 'حساب العميل' : 'Consumer' },
+                { value: 'provider', label: isRTL ? 'مقدم الخدمة' : 'Service Provider' },
+              ]}
+              value={currentRole}
+              onChange={(newRole) => setCurrentRole(newRole)}
+              isRTL={isRTL}
+            />
+          </div>
         </div>
 
         {/* Quick Access Section */}
@@ -79,7 +96,7 @@ export const Screen9_SignIn: React.FC<Screen9Props> = ({
               {toggles.googleAuth && (
                 <button
                   type="button"
-                  onClick={() => onNavigate(role === 'consumer' ? 'consumer_home' : 'provider_dashboard')}
+                  onClick={() => onNavigate(currentRole === 'consumer' ? 'consumer_home' : 'provider_dashboard')}
                   className="py-2.5 px-3 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#0F172A] dark:text-slate-100 font-semibold text-xs hover:border-[#3B82F6] transition flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -95,7 +112,7 @@ export const Screen9_SignIn: React.FC<Screen9Props> = ({
               {toggles.facebookAuth && (
                 <button
                   type="button"
-                  onClick={() => onNavigate(role === 'consumer' ? 'consumer_home' : 'provider_dashboard')}
+                  onClick={() => onNavigate(currentRole === 'consumer' ? 'consumer_home' : 'provider_dashboard')}
                   className="py-2.5 px-3 rounded-xl bg-[#1877F2] text-white font-semibold text-xs hover:bg-[#166fe5] transition flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -108,7 +125,7 @@ export const Screen9_SignIn: React.FC<Screen9Props> = ({
               {toggles.appleAuth && (
                 <button
                   type="button"
-                  onClick={() => onNavigate(role === 'consumer' ? 'consumer_home' : 'provider_dashboard')}
+                  onClick={() => onNavigate(currentRole === 'consumer' ? 'consumer_home' : 'provider_dashboard')}
                   className="py-2.5 px-3 rounded-xl bg-[#0F172A] text-white font-semibold text-xs hover:bg-[#1E293B] transition flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

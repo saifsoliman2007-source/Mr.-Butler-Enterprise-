@@ -36,6 +36,14 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
   const [acceptTerms, setAcceptTerms] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const handleRoleChange = (newRole: Role) => {
+    setRole(newRole);
+    onUpdateFormData({ role: newRole });
+    if (newRole === 'provider') {
+      onNavigate(6); // Visibly & functionally enter Provider Registration
+    }
+  };
+
   const handleCreateAccount = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
@@ -51,7 +59,11 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
       role,
       businessPhone: phone
     });
-    onNavigate('verify_email');
+    if (role === 'provider') {
+      onNavigate(6); // Provider Registration
+    } else {
+      onNavigate('verify_email');
+    }
   };
 
   const handleSocialRegister = (provider: string) => {
@@ -59,7 +71,11 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
       email: `${provider.toLowerCase()}@user.mrbutler.com`,
       role
     });
-    onNavigate('verify_email');
+    if (role === 'provider') {
+      onNavigate(6); // Provider Registration
+    } else {
+      onNavigate('verify_email');
+    }
   };
 
   return (
@@ -101,7 +117,7 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
                 { value: 'provider', label: isRTL ? 'مقدم الخدمة' : 'Service Provider' },
               ]}
               value={role}
-              onChange={(newRole) => setRole(newRole)}
+              onChange={handleRoleChange}
               isRTL={isRTL}
             />
           </div>

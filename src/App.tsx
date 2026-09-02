@@ -27,7 +27,6 @@ import { Screen9_SignIn } from './components/screens/Screen9_SignIn';
 import { Screen10_ForgotPassword } from './components/screens/Screen10_ForgotPassword';
 import { Screen11_ResetPassword } from './components/screens/Screen11_ResetPassword';
 import { ConsumerHomePreview } from './components/screens/ConsumerHomePreview';
-import { ProviderDashboardPreview } from './components/screens/ProviderDashboardPreview';
 
 // Unified Service Suite Screens
 import { ScreenWelcomePortal } from './components/screens/ScreenWelcomePortal';
@@ -43,6 +42,15 @@ import { ScreenOrders } from './components/screens/ScreenOrders';
 import { ScreenFoundation } from './components/screens/ScreenFoundation';
 import { ScreenGoogleDrive } from './components/screens/ScreenGoogleDrive';
 import { BottomNavigationBar } from './components/navigation/BottomNavigationBar';
+
+// Service Provider Suite Screens
+import { ScreenProviderDashboard } from './components/screens/ScreenProviderDashboard';
+import { ScreenProviderOrders } from './components/screens/ScreenProviderOrders';
+import { ScreenProviderOrderDetails } from './components/screens/ScreenProviderOrderDetails';
+import { ScreenProviderMessages } from './components/screens/ScreenProviderMessages';
+import { ScreenProviderProfile } from './components/screens/ScreenProviderProfile';
+import { INITIAL_PROVIDER_ORDERS, INITIAL_PROVIDER_PROFILE } from './data/providerData';
+import { ProviderOrder, ProviderBusinessProfile, OrderStatus } from './types';
 
 // Helper to determine if bottom nav should be displayed
 function shouldShowBottomNav(screen: ScreenId): boolean {
@@ -66,6 +74,9 @@ function shouldShowBottomNav(screen: ScreenId): boolean {
     'foundation_accessibility',
     'consumer_home',
     'provider_dashboard',
+    'provider_orders',
+    'provider_messages',
+    'provider_profile',
   ]);
   return mainScreens.has(String(screen));
 }
@@ -114,6 +125,42 @@ export default function App() {
     businessPhone: '',
     businessAddress: '',
   });
+
+  // Service Provider State
+  const [providerProfile, setProviderProfile] = useState<ProviderBusinessProfile>(INITIAL_PROVIDER_PROFILE);
+  const [providerOrders, setProviderOrders] = useState<ProviderOrder[]>(INITIAL_PROVIDER_ORDERS);
+  const [selectedProviderOrder, setSelectedProviderOrder] = useState<ProviderOrder>(INITIAL_PROVIDER_ORDERS[0]);
+
+  const handleUpdateOrderStatus = useCallback((orderId: string, newStatus: OrderStatus, note?: string) => {
+    setProviderOrders((prev) =>
+      prev.map((order) => {
+        if (order.id === orderId) {
+          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const updated = {
+            ...order,
+            status: newStatus,
+            statusHistory: [
+              ...order.statusHistory,
+              { status: newStatus, timestamp, note: note || `Status updated to ${newStatus}` }
+            ]
+          };
+          if (selectedProviderOrder?.id === orderId) {
+            setSelectedProviderOrder(updated);
+          }
+          return updated;
+        }
+        return order;
+      })
+    );
+  }, [selectedProviderOrder]);
+
+  const handleUpdateProviderProfile = useCallback((updated: ProviderBusinessProfile) => {
+    setProviderProfile(updated);
+  }, []);
+
+  const handleSelectProviderOrder = useCallback((order: ProviderOrder) => {
+    setSelectedProviderOrder(order);
+  }, []);
 
   // Navigate to screen with full Android & iOS history integration
   const navigateTo = useCallback((screen: ScreenId) => {
@@ -399,22 +446,69 @@ export default function App() {
             />
           )}
 
+          {/* Provider Flow Unified Screens */}
           {currentScreen === 'provider_dashboard' && (
-            <ProviderDashboardPreview
-              email={registrationData.email}
-              businessName={registrationData.businessName}
+            <ScreenProviderDashboard
+              profile={providerProfile}
+              orders={providerOrders}
+              onNavigate={navigateTo}
+              onSelectOrder={handleSelectProviderOrder}
+              onUpdateOrderStatus={handleUpdateOrderStatus}
+              lang={language}
+            />
+          )}
+
+          {currentScreen === 'provider_orders' && (
+            <ScreenProviderOrders
+              orders={providerOrders}
+              onNavigate={navigateTo}
+              onSelectOrder={handleSelectProviderOrder}
+              onUpdateOrderStatus={handleUpdateOrderStatus}
+              lang={language}
+            />
+          )}
+
+          {currentScreen === 'provider_order_details' && (
+            <ScreenProviderOrderDetails
+              order={selectedProviderOrder || providerOrders[0]}
+              onNavigate={navigateTo}
+              onUpdateOrderStatus={handleUpdateOrderStatus}
+              onOpenChat={(orderId) => {
+                const target = providerOrders.find(o => o.id === orderId) || providerOrders[0];
+                handleSelectProviderOrder(target);
+                navigateTo('provider_messages');
+              }}
+              lang={language}
+            />
+          )}
+
+          {currentScreen === 'provider_messages' && (
+            <ScreenProviderMessages
+              orders={providerOrders}
+              selectedOrderId={selectedProviderOrder?.id}
+              onNavigate={navigateTo}
+              onSelectOrder={handleSelectProviderOrder}
+              lang={language}
+            />
+          )}
+
+          {currentScreen === 'provider_profile' && (
+            <ScreenProviderProfile
+              profile={providerProfile}
+              onUpdateProfile={handleUpdateProviderProfile}
               onNavigate={navigateTo}
               lang={language}
             />
           )}
         </main>
 
-        {/* Global Bottom Navigation Bar for Core Consumer Flow */}
+        {/* Global Bottom Navigation Bar */}
         {shouldShowBottomNav(currentScreen) && (
           <BottomNavigationBar
             currentScreen={currentScreen}
             onNavigate={navigateTo}
             lang={language}
+            role={String(currentScreen).startsWith('provider_') ? 'provider' : selectedRole}
           />
         )}
 
