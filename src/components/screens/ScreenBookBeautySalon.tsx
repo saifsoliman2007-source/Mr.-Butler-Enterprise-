@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ScreenId, Language } from '../../types';
+import { ScreenId, Language, ProviderOrder } from '../../types';
 import { RecurringAppHeader } from '../RecurringAppHeader';
 import { 
   DatePicker, 
   TimePicker, 
   AddressInput, 
   AddressValue, 
+  ImageInput,
+  TextInput,
   ServiceTypeGrid,
   ItemQuantityStepper
 } from '../forms';
@@ -19,13 +21,16 @@ import {
   Crown, 
   ArrowRight,
   ShoppingBag,
-  HeartHandshake
+  Camera,
+  HeartHandshake,
+  Eye
 } from 'lucide-react';
 
 interface ScreenBookBeautySalonProps {
   onNavigate: (screen: ScreenId) => void;
   lang: Language;
   onLanguageChange?: (lang: Language) => void;
+  onBookingSubmit?: (orderData: Partial<ProviderOrder>) => void;
 }
 
 export type BeautyPackageTier = 'essential' | 'signature' | 'vip';
@@ -44,7 +49,8 @@ export interface BeautyServiceItem {
 export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({ 
   onNavigate, 
   lang,
-  onLanguageChange 
+  onLanguageChange,
+  onBookingSubmit 
 }) => {
   const isRTL = lang === 'ar';
 
@@ -102,6 +108,8 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
   ]);
 
   const [selectedStylist, setSelectedStylist] = useState('julian');
+  const [hairStylePhoto, setHairStylePhoto] = useState<string | null>(null);
+  const [specialInstructions, setSpecialInstructions] = useState('');
   const [locationType, setLocationType] = useState<'home' | 'suite'>('home');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('11:00 AM - 01:00 PM');
@@ -273,13 +281,95 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
           </div>
         </div>
 
-        {/* 2. Select Professional / Stylist */}
+        {/* 2. Hair, Beard & Style Inspiration Photo */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4.5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Camera className="w-3.5 h-3.5 text-[#00444D] dark:text-[#ABEDFA] shrink-0" />
+              <h2 className="text-xs sm:text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] tracking-wide truncate">
+                {isRTL ? '٢. صورة الإلهام لقصة أو تسريحة الشعر (اختياري)' : '2. Hair, Makeup & Style Inspiration Photo'}
+              </h2>
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-slate-400">
+              {isRTL ? 'تخصيص كامل' : 'Style Reference'}
+            </span>
+          </div>
+
+          <ImageInput
+            label={isRTL ? 'صورة الإلهام أو التسريحة المطلوبة' : 'Reference Look / Hairstyle Photo'}
+            value={hairStylePhoto}
+            onChange={setHairStylePhoto}
+            helperText={isRTL ? 'ارفع صورة القصة أو التسريحة المرغوبة ليقوم خبير الصالون بتجهيز المستحضرات والأدوات المناسبة مسبقاً' : 'Upload a photo of your desired cut, hairstyle, color, or makeup look so your stylist prepares bespoke products.'}
+            isRTL={isRTL}
+          />
+
+          {/* Style Inspiration Presets */}
+          <div className="space-y-1.5 pt-1">
+            <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block">
+              {isRTL ? 'أو اختر من صيحات الأناقة المعتمدة:' : 'Or choose from signature style references:'}
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                {
+                  id: 'blowout',
+                  label: isRTL ? 'ويفي فرنسي ناعم' : 'Parisian Waves',
+                  img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80'
+                },
+                {
+                  id: 'fade',
+                  label: isRTL ? 'حلاقة محددة ولحية' : 'Gentleman Fade',
+                  img: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&auto=format&fit=crop&q=80'
+                },
+                {
+                  id: 'glam',
+                  label: isRTL ? 'تسريحة كوتور ملكية' : 'Couture Glam',
+                  img: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=400&auto=format&fit=crop&q=80'
+                },
+                {
+                  id: 'facial',
+                  label: isRTL ? 'تغذية نضارة البشرة' : 'Dewy Skin Glow',
+                  img: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80'
+                }
+              ].map(preset => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setHairStylePhoto(preset.img)}
+                  className={`relative rounded-xl overflow-hidden border p-1.5 flex flex-col items-center gap-1.5 text-center transition-all cursor-pointer ${
+                    hairStylePhoto === preset.img
+                      ? 'border-[#00444D] dark:border-[#ABEDFA] bg-[#E6EEFF] dark:bg-slate-800 ring-2 ring-[#00444D]/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-slate-50 dark:bg-slate-800/40'
+                  }`}
+                >
+                  <img 
+                    src={preset.img} 
+                    alt={preset.label}
+                    className="w-full h-14 object-cover rounded-lg"
+                  />
+                  <span className="text-[10px] font-medium text-slate-700 dark:text-slate-200 leading-tight">
+                    {preset.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <TextInput
+            label={isRTL ? 'ملاحظات التسريحة أو حساسية البشرة' : 'Styling Preferences or Skin Sensitivities'}
+            value={specialInstructions}
+            onChange={(e) => setSpecialInstructions(e.target.value)}
+            placeholder={isRTL ? 'مثال: تفضيل شامبو عضوي خالي من الكبريتات، خصلات ويفي عريضة...' : 'e.g., Sulfate-free organic shampoo preferred, natural loose curl finish...'}
+            isRTL={isRTL}
+          />
+        </div>
+
+        {/* 3. Select Professional / Stylist */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4.5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 dark:border-slate-800 pb-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <Crown className="w-3.5 h-3.5 text-[#00444D] dark:text-[#ABEDFA] shrink-0" />
               <h2 className="text-xs sm:text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] tracking-wide truncate">
-                {isRTL ? '٢. اختيار الأخصائي أو المصفف' : '2. Select Stylist or Artisan'}
+                {isRTL ? '٣. اختيار الأخصائي أو المصفف' : '3. Select Stylist or Artisan'}
               </h2>
             </div>
             <span className="text-[10px] sm:text-[11px] text-slate-400">
@@ -317,10 +407,10 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
           </div>
         </div>
 
-        {/* 3. Schedule Date & Time */}
+        {/* 4. Schedule Date & Time */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4.5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs space-y-3.5">
           <h2 className="text-xs sm:text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] border-b border-slate-100 dark:border-slate-800 pb-2">
-            {isRTL ? '٣. موعد الجلسة' : '3. Appointment Date & Time'}
+            {isRTL ? '٤. موعد الجلسة' : '4. Appointment Date & Time'}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -346,10 +436,10 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
           </div>
         </div>
 
-        {/* 4. Location Address */}
+        {/* 5. Location Address */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4.5 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs space-y-3.5">
           <h2 className="text-xs sm:text-sm font-bold text-[#00444D] dark:text-[#ABEDFA] border-b border-slate-100 dark:border-slate-800 pb-2">
-            {isRTL ? '٤. عنوان وموقع الجلسة' : '4. In-Suite / Home Location'}
+            {isRTL ? '٥. عنوان وموقع الجلسة' : '5. In-Suite / Home Location'}
           </h2>
           <AddressInput
             label={isRTL ? 'عنوان الإقامة' : 'Residence Location'}
@@ -380,7 +470,34 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
 
           <button
             type="button"
-            onClick={() => setIsBooked(true)}
+            onClick={() => {
+              const selectedItemsList = items
+                .filter(it => it.count > 0)
+                .map(it => ({
+                  id: `it-${it.id}`,
+                  name: `${isRTL ? it.nameAr : it.name} (${it.serviceType})`,
+                  quantity: it.count,
+                  price: it.prices[it.serviceType],
+                  notes: `Stylist: ${selectedStylist}, Location: ${locationType === 'home' ? 'Private Residence' : 'Hotel Suite'}`
+                }));
+
+              if (onBookingSubmit) {
+                onBookingSubmit({
+                  category: 'Beauty Salon & Grooming',
+                  serviceTitle: 'Private Salon Grooming & Aesthetic Session',
+                  items: selectedItemsList.length > 0 ? selectedItemsList : [
+                    { id: 'it-default', name: 'Master Salon & Hair Styling Service', quantity: totalItems || 1, price: calculatedTotal || 95 }
+                  ],
+                  estimatedPrice: calculatedTotal || 95,
+                  requestedDateTime: `${date} (${time})`,
+                  customerAddress: `${address.street}, ${address.unit || ''}`.trim(),
+                  customerDistrict: address.city || 'Mayfair District',
+                  customerNotes: specialInstructions || undefined,
+                  uploadedImages: hairStylePhoto ? [hairStylePhoto] : [],
+                });
+              }
+              setIsBooked(true);
+            }}
             disabled={totalItems === 0}
             className="w-full py-3 px-4 rounded-xl bg-[#FFE088] text-[#00444D] hover:bg-[#FFD566] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.99]"
           >
@@ -394,7 +511,7 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
         {/* Confirmation Modal */}
         {isBooked && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl border border-[#D9E3F6] dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl border border-[#D9E3F6] dark:border-slate-800 animate-fadeIn">
               <div className="w-12 h-12 rounded-full bg-[#E6EEFF] dark:bg-slate-800 text-[#00444D] dark:text-[#FFE088] mx-auto flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
@@ -403,21 +520,49 @@ export const ScreenBookBeautySalon: React.FC<ScreenBookBeautySalonProps> = ({
                   {isRTL ? 'تم تأكيد موعد الصالون' : 'Salon Appointment Confirmed'}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  {isRTL ? `تم تأكيد حجز الموعد في ${date} خلال الفترة ${time}. سيصل خبير الصالون مع كافة الأدوات المعقمة.` : `Your booking is confirmed for ${date} during ${time}. Our specialist will arrive with sanitized, salon-grade equipment.`}
+                  {isRTL 
+                    ? `تم تأكيد حجز الموعد في ${date} خلال الفترة ${time}. تم إرسال صور تسريحة الشعر وتفضيلات الأسلوب لمصفف الشعر.` 
+                    : `Your booking is confirmed for ${date} during ${time}. Your hairstyle reference photo and aesthetic preferences have been routed to your stylist.`}
                 </p>
               </div>
+
+              {hairStylePhoto && (
+                <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 text-left rtl:text-right">
+                  <img
+                    src={hairStylePhoto}
+                    alt="Hairstyle Reference"
+                    className="w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-slate-600"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold text-emerald-600 block">
+                      {isRTL ? 'تم ربط صورة التسريحة والأسلوب بالطلب' : 'Hairstyle Photo Linked'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 truncate block">
+                      {specialInstructions || (isRTL ? 'جاهز لمعاينة المصفف' : 'Ready for master stylist review')}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className="pt-2 flex flex-col gap-2">
                 <button
-                  onClick={() => onNavigate('our_services')}
-                  className="w-full py-2.5 rounded-xl bg-[#00444D] text-white font-bold text-xs hover:bg-[#0D5D68] cursor-pointer"
+                  onClick={() => {
+                    setIsBooked(false);
+                    onNavigate('provider_order_details');
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#00444D] text-white font-bold text-xs hover:bg-[#0D5D68] cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
-                  {isRTL ? 'العودة للخدمات' : 'Back to Services'}
+                  <Eye className="w-3.5 h-3.5 text-[#FFE088]" />
+                  <span>{isRTL ? 'معاينة في تفاصيل الطلب لمزود الخدمة' : 'View in Provider Order Details'}</span>
                 </button>
                 <button
-                  onClick={() => setIsBooked(false)}
+                  onClick={() => {
+                    setIsBooked(false);
+                    onNavigate('our_services');
+                  }}
                   className="w-full py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold text-xs hover:bg-slate-200 cursor-pointer"
                 >
-                  {isRTL ? 'إغلاق' : 'Close'}
+                  {isRTL ? 'العودة للخدمات' : 'Back to Services'}
                 </button>
               </div>
             </div>

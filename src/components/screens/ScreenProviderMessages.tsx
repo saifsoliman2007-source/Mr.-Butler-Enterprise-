@@ -17,7 +17,11 @@ import {
   ChevronRight,
   Package,
   Search,
-  CheckCheck
+  CheckCheck,
+  Camera,
+  Image as ImageIcon,
+  X,
+  ZoomIn
 } from 'lucide-react';
 
 interface ScreenProviderMessagesProps {
@@ -55,6 +59,9 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
   const [inputText, setInputText] = useState('');
   const [showAiSuggestions, setShowAiSuggestions] = useState(true);
   const [enableLiveTranslate, setEnableLiveTranslate] = useState(false);
+  const [pendingAttachedImage, setPendingAttachedImage] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; caption?: string; sender?: string } | null>(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   // Current active order
   const activeOrder = orders.find(o => o.id === activeOrderId) || orders[0];
@@ -76,8 +83,10 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
         orderId: 'ord-101',
         senderRole: 'provider',
         senderName: 'Master Artisan',
-        text: 'Rest assured, My Lord. We will hand-shield every button before steam hand-pressing.',
+        text: 'Rest assured, My Lord. We have hand-shielded every button before steam hand-pressing. Here is the intake inspection confirmation.',
         timestamp: '10:18 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Ultrasonic spot-treatment station ready for delicate lapel cleaning',
         isRead: true,
       },
       {
@@ -96,19 +105,71 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
         orderId: 'ord-102',
         senderRole: 'customer',
         senderName: 'Lady Kensington',
-        text: 'Could we ensure the silk hem is taken up exactly 1.5 inches?',
+        text: 'Could we ensure the silk hem is taken up exactly 1.5 inches as shown in this fitting reference?',
         timestamp: '11:20 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Fitting Drape & Measurement Reference',
+        isRead: true,
+      },
+      {
+        id: 'msg-5',
+        orderId: 'ord-102',
+        senderRole: 'provider',
+        senderName: 'Master Artisan',
+        text: 'Understood, My Lady. We have pinned the waist taper with precision chalk lines. Starting silk blind-stitching now.',
+        timestamp: '11:25 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Silk basting in progress at atelier bench',
         isRead: true,
       }
     ],
     'ord-103': [
       {
-        id: 'msg-5',
+        id: 'msg-6',
         orderId: 'ord-103',
         senderRole: 'customer',
         senderName: 'Prince Khalid',
         text: 'Please use Saphir Medaille d\'Or polish for the calfskin patina.',
         timestamp: '09:45 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Toe Box & Leather Condition',
+        isRead: true,
+      },
+      {
+        id: 'msg-7',
+        orderId: 'ord-103',
+        senderRole: 'provider',
+        senderName: 'Master Artisan',
+        text: 'Applied Saphir Médaille d’Or beeswax cream with champagne gloss glaze.',
+        timestamp: '09:50 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Mirror gloss glaze completed',
+        isRead: true,
+      }
+    ],
+    'ord-104': [
+      {
+        id: 'msg-8',
+        orderId: 'ord-104',
+        senderRole: 'customer',
+        senderName: 'Countess Victoria',
+        text: 'Here is the style inspiration for my Parisian blowout for the diplomatic gala.',
+        timestamp: '09:00 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Parisian Blowout & Gloss Reference Look',
+        isRead: true,
+      }
+    ],
+    'ord-105': [
+      {
+        id: 'msg-9',
+        orderId: 'ord-105',
+        senderRole: 'customer',
+        senderName: 'Sir Arthur Pendelton',
+        text: 'Here is Barnaby’s photo. He prefers gentle lavender shampoo and scissors trim only.',
+        timestamp: '08:30 AM',
+        imageUrl: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=600&auto=format&fit=crop&q=80',
+        imageCaption: 'Barnaby (Golden Retriever) Grooming Reference',
         isRead: true,
       }
     ]
@@ -118,14 +179,16 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
 
   const handleSendMessage = (textToSend?: string) => {
     const text = textToSend || inputText;
-    if (!text.trim()) return;
+    if (!text.trim() && !pendingAttachedImage) return;
 
     const newMsg: ProviderMessage = {
       id: `msg-${Date.now()}`,
       orderId: activeOrderId,
       senderRole: 'provider',
       senderName: 'Master Artisan',
-      text: text.trim(),
+      text: text.trim() || 'Attached service photo for your inspection.',
+      imageUrl: pendingAttachedImage || undefined,
+      imageCaption: pendingAttachedImage ? 'Artisan Service Verification Asset' : undefined,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isRead: true,
     };
@@ -136,6 +199,21 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
     }));
 
     setInputText('');
+    setPendingAttachedImage(null);
+    setShowImagePicker(false);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setPendingAttachedImage(result);
+        setShowImagePicker(false);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const aiCannedReplies = [
@@ -305,6 +383,40 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
                         : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-bl-xs'
                     }`}
                   >
+                    {/* Attached Photo Display */}
+                    {msg.imageUrl && (
+                      <div className="mb-2.5 rounded-xl overflow-hidden border border-black/10 dark:border-white/10 group relative">
+                        <img
+                          src={msg.imageUrl}
+                          alt={msg.imageCaption || 'Attached photo'}
+                          referrerPolicy="no-referrer"
+                          className="w-full max-h-56 object-cover cursor-pointer hover:scale-[1.02] transition duration-200"
+                          onClick={() => setLightboxImage({
+                            url: msg.imageUrl!,
+                            caption: msg.imageCaption || msg.text,
+                            sender: msg.senderName
+                          })}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setLightboxImage({
+                            url: msg.imageUrl!,
+                            caption: msg.imageCaption || msg.text,
+                            sender: msg.senderName
+                          })}
+                          className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-black/60 text-white backdrop-blur-xs text-[10px] font-medium flex items-center gap-1 opacity-90 hover:opacity-100 cursor-pointer"
+                        >
+                          <ZoomIn className="w-3 h-3" />
+                          <span>Expand</span>
+                        </button>
+                        {msg.imageCaption && (
+                          <div className={`p-1.5 text-[11px] font-medium ${isProvider ? 'bg-[#00333A] text-white/90' : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300'}`}>
+                            {msg.imageCaption}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <p>{msg.text}</p>
                     {enableLiveTranslate && (
                       <p className="mt-1.5 pt-1.5 border-t border-white/20 text-[11px] opacity-80 italic">
@@ -316,6 +428,33 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
               );
             })}
           </div>
+
+          {/* Pending Photo Preview Bar */}
+          {pendingAttachedImage && (
+            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border-t border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img
+                  src={pendingAttachedImage}
+                  alt="Ready to send"
+                  className="w-10 h-10 rounded-lg object-cover border border-emerald-300 dark:border-emerald-700"
+                />
+                <div className="min-w-0">
+                  <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
+                    Photo Attached
+                  </span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 truncate block">
+                    Will be sent with your next message
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setPendingAttachedImage(null)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* AI Assistive Suggestions Bar */}
           {showAiSuggestions && (
@@ -347,8 +486,22 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
             </div>
           )}
 
-          {/* Message Input Box */}
+          {/* Message Input Box with Photo Attachment */}
           <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
+            
+            {/* Attachment Button */}
+            <div className="relative">
+              <label className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 hover:text-[#00444D] transition cursor-pointer flex items-center justify-center">
+                <Camera className="w-4 h-4" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
             <input
               type="text"
               value={inputText}
@@ -362,8 +515,8 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
 
             <button
               onClick={() => handleSendMessage()}
-              disabled={!inputText.trim()}
-              className="p-2.5 rounded-xl bg-[#00444D] text-white hover:bg-[#00333A] disabled:opacity-40 transition cursor-pointer flex items-center justify-center"
+              disabled={!inputText.trim() && !pendingAttachedImage}
+              className="p-2.5 rounded-xl bg-[#00444D] text-white hover:bg-[#00333A] disabled:opacity-40 transition cursor-pointer flex items-center justify-center shadow-xs"
             >
               <Send className="w-4 h-4 text-[#FFE088]" />
             </button>
@@ -372,6 +525,47 @@ export const ScreenProviderMessages: React.FC<ScreenProviderMessagesProps> = ({
         </div>
 
       </div>
+
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div 
+          onClick={() => setLightboxImage(null)}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+        >
+          <div className="relative max-w-3xl w-full bg-white dark:bg-slate-900 rounded-2xl p-4 overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-[#00444D] dark:text-[#FFE088]" />
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    {lightboxImage.caption || 'Inspection & Consultation Asset'}
+                  </h4>
+                  {lightboxImage.sender && (
+                    <span className="text-[11px] text-slate-400">
+                      Sent by: {lightboxImage.sender}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setLightboxImage(null)}
+                className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="rounded-xl overflow-hidden bg-black/5 dark:bg-black/40 flex items-center justify-center max-h-[65vh]">
+              <img
+                src={lightboxImage.url}
+                alt="Expanded view"
+                referrerPolicy="no-referrer"
+                className="w-full h-auto max-h-[65vh] object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

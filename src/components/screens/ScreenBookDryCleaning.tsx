@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScreenId, Language } from '../../types';
+import { ScreenId, Language, ProviderOrder } from '../../types';
 import { RecurringAppHeader } from '../RecurringAppHeader';
 import { 
   SegmentedControl, 
@@ -16,17 +16,20 @@ import {
 import { 
   CheckCircle2, 
   ArrowLeft, 
-  ArrowRight,
-  Shirt,
-  Sparkles,
-  ShoppingBag,
-  Wind
+  ArrowRight, 
+  Shirt, 
+  Sparkles, 
+  ShoppingBag, 
+  Wind,
+  Eye,
+  Camera
 } from 'lucide-react';
 
 interface ScreenBookDryCleaningProps {
   onNavigate: (screen: ScreenId) => void;
   lang: Language;
   onLanguageChange?: (lang: Language) => void;
+  onBookingSubmit?: (orderData: Partial<ProviderOrder>) => void;
 }
 
 export type ServiceTypeOption = 'dry_clean' | 'wash_fold' | 'ironing';
@@ -46,6 +49,7 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
   onNavigate, 
   lang,
   onLanguageChange,
+  onBookingSubmit,
 }) => {
   const isRTL = lang === 'ar';
 
@@ -421,7 +425,34 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
           </div>
 
           <button
-            onClick={() => setIsBooked(true)}
+            onClick={() => {
+              const selectedItemsList = items
+                .filter(it => it.count > 0)
+                .map(it => ({
+                  id: `it-${it.id}`,
+                  name: `${isRTL ? it.nameAr : it.name} (${it.serviceType})`,
+                  quantity: it.count,
+                  price: it.prices[it.serviceType],
+                  notes: `Starch: ${starchLevel}, Eco: ${ecoFriendly ? 'Yes' : 'No'}`
+                }));
+
+              if (onBookingSubmit) {
+                onBookingSubmit({
+                  category: 'Laundry & Dry Cleaning',
+                  serviceTitle: 'Bespoke Dry Cleaning & Laundry Care',
+                  items: selectedItemsList.length > 0 ? selectedItemsList : [
+                    { id: 'it-default', name: 'Premium Garment Care & Dry Cleaning', quantity: totalItems || 1, price: subtotal || 45 }
+                  ],
+                  estimatedPrice: subtotal || 45,
+                  requestedDateTime: `${pickupDate} (${pickupTime})`,
+                  customerAddress: `${address.street}, ${address.unit || ''}`.trim(),
+                  customerDistrict: address.city || 'Mayfair District',
+                  customerNotes: specialInstructions || undefined,
+                  uploadedImages: garmentPhoto ? [garmentPhoto] : [],
+                });
+              }
+              setIsBooked(true);
+            }}
             className="w-full bg-[#00444D] hover:bg-[#0D5D68] text-white font-semibold text-xs sm:text-sm py-3 px-5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 border-b-2 border-[#CCA730] cursor-pointer group active:scale-[0.99] min-h-[44px]"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#FFE088]" />
@@ -447,16 +478,45 @@ export const ScreenBookDryCleaning: React.FC<ScreenBookDryCleaningProps> = ({
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               {isRTL 
-                ? `تم تعيين موعد الاستلام لعدد ${totalItems} قطعة في ${pickupDate} خلال الفترة ${pickupTime}.` 
-                : `Your Mr. Butler valet has been assigned. We will collect ${totalItems} items on ${pickupDate} during ${pickupTime}.`}
+                ? `تم تعيين موعد الاستلام لعدد ${totalItems} قطعة في ${pickupDate} خلال الفترة ${pickupTime}. تم إرفاق الصور وملاحظات العناية بالأقمشة بنجاح لمزود الخدمة.` 
+                : `Your Mr. Butler valet has been assigned. We will collect ${totalItems} items on ${pickupDate} during ${pickupTime}. Your inspection photos and care instructions have been synchronized to the master artisan.`}
             </p>
-            <div className="pt-1">
+
+            {garmentPhoto && (
+              <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 text-left rtl:text-right">
+                <img
+                  src={garmentPhoto}
+                  alt="Customer Intake Upload"
+                  className="w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-slate-600"
+                />
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-bold text-emerald-600 block">
+                    {isRTL ? 'تم إرسال صورة الفحص لمزود الخدمة' : 'Intake Photo Linked to Order'}
+                  </span>
+                  <span className="text-[10px] text-slate-500 truncate block">
+                    {specialInstructions || (isRTL ? 'جاهز لمعاينة خبير الأقمشة' : 'Ready for artisan inspection')}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  setIsBooked(false);
+                  onNavigate('provider_order_details');
+                }}
+                className="w-full py-2.5 bg-[#00444D] hover:bg-[#0D5D68] text-white rounded-xl font-bold text-xs shadow-sm cursor-pointer transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Eye className="w-3.5 h-3.5 text-[#FFE088]" />
+                <span>{isRTL ? 'معاينة في تفاصيل الطلب لمزود الخدمة' : 'View in Provider Order Details'}</span>
+              </button>
               <button
                 onClick={() => {
                   setIsBooked(false);
                   onNavigate('our_services');
                 }}
-                className="w-full py-2.5 bg-[#00444D] hover:bg-[#0D5D68] text-white rounded-xl font-semibold text-xs shadow-sm cursor-pointer transition-colors"
+                className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
               >
                 {isRTL ? 'العودة لدليل الخدمات' : 'Back to Services Directory'}
               </button>

@@ -3,7 +3,8 @@ import { Language, ScreenId, RegistrationData } from '../../types';
 import { translations } from '../../data/translations';
 import { PasswordStrengthIndicator } from '../PasswordStrengthIndicator';
 import { EGEC } from '../EGEC';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
+import { ProfilePictureUploader } from '../forms';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, AlertCircle, User } from 'lucide-react';
 
 interface Screen3Props {
   formData: RegistrationData;
@@ -19,6 +20,7 @@ export const Screen3_ConsumerReg: React.FC<Screen3Props> = ({
   lang,
 }) => {
   const t = translations[lang] || translations.en;
+  const isRTL = lang === 'ar';
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,7 +65,7 @@ export const Screen3_ConsumerReg: React.FC<Screen3Props> = ({
       <div className="flex items-center justify-between">
         <button
           onClick={() => onNavigate(2)}
-          className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#475569] dark:text-slate-300 hover:bg-[#F1F5F9] transition flex items-center gap-1.5 text-xs font-semibold"
+          className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#475569] dark:text-slate-300 hover:bg-[#F1F5F9] transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 text-[#3B82F6]" />
           <span>Back</span>
@@ -83,11 +85,41 @@ export const Screen3_ConsumerReg: React.FC<Screen3Props> = ({
             Create Consumer Account
           </h1>
           <p className="text-xs text-[#64748B] dark:text-slate-400">
-            Enter your credentials to receive a 6-digit verification code
+            Enter your credentials and choose a profile picture to get started
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          
+          {/* Profile Picture Uploader */}
+          <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex justify-center">
+            <ProfilePictureUploader
+              type="consumer"
+              value={formData.profilePicture || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'}
+              onChange={(img) => onUpdateFormData({ profilePicture: img || undefined })}
+              label={isRTL ? 'صورة العميل' : 'Consumer Profile Picture'}
+              helperText={isRTL ? 'خصص حسابك بصورة أنيقة' : 'Personalize your profile'}
+              size="md"
+              isRTL={isRTL}
+            />
+          </div>
+
+          {/* Full Name */}
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-[#1E293B] dark:text-slate-300">
+              {isRTL ? 'الاسم الكامل' : 'Full Name'}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.fullName || ''}
+                onChange={(e) => onUpdateFormData({ fullName: e.target.value })}
+                placeholder="Lord Alistair Sterling"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border text-sm bg-white dark:bg-slate-900 border-[#E2E8F0] dark:border-slate-800 text-[#0F172A] dark:text-slate-100 focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition outline-none min-h-[44px]"
+              />
+              <User className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
           
           {/* Email Address */}
           <div className="space-y-1">

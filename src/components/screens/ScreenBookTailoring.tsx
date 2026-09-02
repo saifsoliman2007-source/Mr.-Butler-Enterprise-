@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScreenId, Language } from '../../types';
+import { ScreenId, Language, ProviderOrder } from '../../types';
 import { RecurringAppHeader } from '../RecurringAppHeader';
 import { 
   DatePicker, 
@@ -21,13 +21,15 @@ import {
   Package,
   ArrowRight,
   ShoppingBag,
-  Layers
+  Layers,
+  Eye
 } from 'lucide-react';
 
 interface ScreenBookTailoringProps {
   onNavigate: (screen: ScreenId) => void;
   lang: Language;
   onLanguageChange?: (lang: Language) => void;
+  onBookingSubmit?: (orderData: Partial<ProviderOrder>) => void;
 }
 
 export type TailoringServiceType = 'hemming' | 'resizing' | 'repair';
@@ -46,7 +48,8 @@ export interface TailoringGarmentItem {
 export const ScreenBookTailoring: React.FC<ScreenBookTailoringProps> = ({ 
   onNavigate, 
   lang,
-  onLanguageChange 
+  onLanguageChange,
+  onBookingSubmit 
 }) => {
   const isRTL = lang === 'ar';
   
@@ -417,7 +420,34 @@ export const ScreenBookTailoring: React.FC<ScreenBookTailoringProps> = ({
 
           <button
             type="button"
-            onClick={() => setIsBooked(true)}
+            onClick={() => {
+              const selectedItemsList = items
+                .filter(it => it.count > 0)
+                .map(it => ({
+                  id: `it-${it.id}`,
+                  name: `${isRTL ? it.nameAr : it.name} (${it.serviceType})`,
+                  quantity: it.count,
+                  price: it.prices[it.serviceType],
+                  notes: `Fitting: ${fittingMethod === 'valet_home' ? 'Private Master Tailor Visit' : 'Sample Garment Replication'}`
+                }));
+
+              if (onBookingSubmit) {
+                onBookingSubmit({
+                  category: 'Tailoring & Alterations',
+                  serviceTitle: 'Bespoke Tailoring, Resizing & Custom Fitting',
+                  items: selectedItemsList.length > 0 ? selectedItemsList : [
+                    { id: 'it-default', name: 'Master Tailoring & Alteration Service', quantity: totalItems || 1, price: calculatedTotal || 85 }
+                  ],
+                  estimatedPrice: calculatedTotal || 85,
+                  requestedDateTime: `${date} (${time})`,
+                  customerAddress: `${address.street}, ${address.unit || ''}`.trim(),
+                  customerDistrict: address.city || 'Mayfair District',
+                  customerNotes: notes || undefined,
+                  uploadedImages: garmentPhoto ? [garmentPhoto] : [],
+                });
+              }
+              setIsBooked(true);
+            }}
             disabled={totalItems === 0}
             className="w-full py-3 px-4 rounded-xl bg-[#FFE088] text-[#00444D] hover:bg-[#FFD566] disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.99]"
           >
@@ -431,7 +461,7 @@ export const ScreenBookTailoring: React.FC<ScreenBookTailoringProps> = ({
         {/* Confirmation Modal / State */}
         {isBooked && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl border border-[#D9E3F6] dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl border border-[#D9E3F6] dark:border-slate-800 animate-fadeIn">
               <div className="w-12 h-12 rounded-full bg-[#E6EEFF] dark:bg-slate-800 text-[#00444D] dark:text-[#FFE088] mx-auto flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
@@ -440,21 +470,49 @@ export const ScreenBookTailoring: React.FC<ScreenBookTailoringProps> = ({
                   {isRTL ? 'تم تأكيد موعد الخياطة' : 'Tailoring Booking Confirmed'}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  {isRTL ? `تم جدولة الموعد في ${date} خلال الفترة ${time}. سيتواصل معك الخياط المختص قبل الموعد.` : `Your fitting has been scheduled for ${date} during ${time}. Our master tailor will coordinate prior to arrival.`}
+                  {isRTL 
+                    ? `تم جدولة الموعد في ${date} خلال الفترة ${time}. تم إرسال صور القطع والمقاسات بنجاح إلى مشغل الخياطة.` 
+                    : `Your fitting has been scheduled for ${date} during ${time}. Your garment photos and measurement notes have been routed to the master tailor.`}
                 </p>
               </div>
+
+              {garmentPhoto && (
+                <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 text-left rtl:text-right">
+                  <img
+                    src={garmentPhoto}
+                    alt="Customer Garment Reference"
+                    className="w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-slate-600"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold text-emerald-600 block">
+                      {isRTL ? 'تم ربط صورة المقاس بالطلب' : 'Garment Photo Linked'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 truncate block">
+                      {notes || (isRTL ? 'جاهز لمطابقة الخياط' : 'Ready for tailoring studio inspection')}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className="pt-2 flex flex-col gap-2">
                 <button
-                  onClick={() => onNavigate('our_services')}
-                  className="w-full py-2.5 rounded-xl bg-[#00444D] text-white font-bold text-xs hover:bg-[#0D5D68] cursor-pointer"
+                  onClick={() => {
+                    setIsBooked(false);
+                    onNavigate('provider_order_details');
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#00444D] text-white font-bold text-xs hover:bg-[#0D5D68] cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
-                  {isRTL ? 'العودة للخدمات' : 'Back to Services'}
+                  <Eye className="w-3.5 h-3.5 text-[#FFE088]" />
+                  <span>{isRTL ? 'معاينة في تفاصيل الطلب لمزود الخدمة' : 'View in Provider Order Details'}</span>
                 </button>
                 <button
-                  onClick={() => setIsBooked(false)}
+                  onClick={() => {
+                    setIsBooked(false);
+                    onNavigate('our_services');
+                  }}
                   className="w-full py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold text-xs hover:bg-slate-200 cursor-pointer"
                 >
-                  {isRTL ? 'إغلاق' : 'Close'}
+                  {isRTL ? 'العودة للخدمات' : 'Back to Services'}
                 </button>
               </div>
             </div>

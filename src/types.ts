@@ -49,6 +49,15 @@ export interface OrderItem {
   notes?: string;
 }
 
+export interface ProviderInspectionPhoto {
+  id: string;
+  url: string;
+  caption: string;
+  stage: 'Intake Inspection' | 'In-Progress Work' | 'Quality Passed' | 'Completed Result';
+  timestamp: string;
+  uploadedBy?: string;
+}
+
 export interface ProviderOrder {
   id: string;
   orderNumber: string;
@@ -66,6 +75,7 @@ export interface ProviderOrder {
   estimatedPrice: number;
   customerNotes?: string;
   uploadedImages?: string[];
+  providerUploadedImages?: ProviderInspectionPhoto[];
   status: OrderStatus;
   statusHistory: { status: OrderStatus; timestamp: string; note?: string }[];
   specialInstructions?: string;
@@ -84,6 +94,8 @@ export interface ProviderMessage {
   senderName: string;
   content?: string;
   text?: string;
+  imageUrl?: string;
+  imageCaption?: string;
   translatedContent?: string;
   timestamp: string;
   isStatusUpdate?: boolean;
@@ -98,6 +110,8 @@ export interface ProviderBusinessProfile {
   contactPerson: string;
   phone: string;
   email: string;
+  logo?: string;
+  profilePicture?: string;
   operatingHours: string;
   serviceAreas: string[];
   pickupDeliveryAvailable: boolean;
@@ -182,6 +196,9 @@ export interface RegistrationData {
   email: string;
   password: string;
   confirmPassword: string;
+  fullName?: string;
+  profilePicture?: string;
+  businessLogo?: string;
   // Provider fields
   businessName?: string;
   businessNumber?: string; // CR Number

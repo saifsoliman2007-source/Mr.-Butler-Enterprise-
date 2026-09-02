@@ -3,6 +3,7 @@ import { Language, ScreenId, RegistrationData, ProviderCategory } from '../../ty
 import { translations } from '../../data/translations';
 import { PasswordStrengthIndicator } from '../PasswordStrengthIndicator';
 import { EGEC } from '../EGEC';
+import { ProfilePictureUploader } from '../forms';
 import { 
   Building2, 
   Phone, 
@@ -152,11 +153,24 @@ export const Screen6_ProviderReg: React.FC<Screen6Props> = ({
         <form onSubmit={handleSubmit} className="space-y-5 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 shadow-sm">
           
           {/* Section 1: Business Identity & Category */}
-          <div className="space-y-3 border-b border-slate-100 dark:border-slate-800 pb-5">
+          <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#00444D] dark:text-[#FFE088] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>1. Service Category & Business Identity</span>
             </h3>
+
+            {/* Provider Logo / Business Picture Uploader */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700/60 flex flex-col items-center">
+              <ProfilePictureUploader
+                type="provider"
+                value={formData.businessLogo || formData.profilePicture || 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=300&auto=format&fit=crop&q=80'}
+                onChange={(img) => onUpdateFormData({ businessLogo: img || undefined, profilePicture: img || undefined })}
+                label="Artisan Establishment Logo & Storefront Photo"
+                helperText="Upload your official brand logo or select a verified artisan crest"
+                size="md"
+                shape="rounded-2xl"
+              />
+            </div>
 
             {/* Category Selector */}
             <div className="space-y-1.5">

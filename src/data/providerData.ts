@@ -8,6 +8,8 @@ export const INITIAL_PROVIDER_PROFILE: ProviderBusinessProfile = {
   contactPerson: 'Master Artisan Pierre Dubois',
   phone: '+966 50 892 4110',
   email: 'concierge@royalsilk-butler.com',
+  logo: 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=200&auto=format&fit=crop&q=80',
+  profilePicture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
   operatingHours: '08:00 AM - 10:00 PM (Sat - Thu)',
   serviceAreas: [
     'Downtown Central',
@@ -49,6 +51,16 @@ export const INITIAL_PROVIDER_ORDERS: ProviderOrder[] = [
       'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=500&auto=format&fit=crop&q=80'
     ],
+    providerUploadedImages: [
+      {
+        id: 'p-img-1',
+        url: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=500&auto=format&fit=crop&q=80',
+        caption: 'Intake Inspection: Spot treatment on delicate lapel silk with organic ultrasonic wand',
+        stage: 'Intake Inspection',
+        timestamp: '10 mins ago',
+        uploadedBy: 'Master Cleaner Pierre'
+      }
+    ],
     status: 'NEW',
     statusHistory: [
       { status: 'NEW', timestamp: '12 mins ago', note: 'Order placed by Lord Sterling via Butler VIP Concierge' }
@@ -80,7 +92,18 @@ export const INITIAL_PROVIDER_ORDERS: ProviderOrder[] = [
     estimatedPrice: 170,
     customerNotes: 'Measurements were taken during last month fitting. Keep excess fabric inside seams.',
     uploadedImages: [
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?w=500&auto=format&fit=crop&q=80'
+    ],
+    providerUploadedImages: [
+      {
+        id: 'p-img-2',
+        url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&auto=format&fit=crop&q=80',
+        caption: 'Fitting & Chalk Lines: 1.5-inch waist taper pinned and seam allowance verified',
+        stage: 'In-Progress Work',
+        timestamp: '25 mins ago',
+        uploadedBy: 'Master Tailor Julian'
+      }
     ],
     status: 'ACCEPTED',
     statusHistory: [
@@ -115,6 +138,16 @@ export const INITIAL_PROVIDER_ORDERS: ProviderOrder[] = [
       'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=500&auto=format&fit=crop&q=80'
     ],
+    providerUploadedImages: [
+      {
+        id: 'p-img-3',
+        url: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&auto=format&fit=crop&q=80',
+        caption: 'Leather Restoration: Saphir Medaille d’Or cream applied to toe cap; scratch filled seamlessly',
+        stage: 'In-Progress Work',
+        timestamp: '1 hour ago',
+        uploadedBy: 'Master Cobbler Giovanni'
+      }
+    ],
     status: 'IN_PROGRESS',
     statusHistory: [
       { status: 'NEW', timestamp: 'Yesterday, 02:00 PM' },
@@ -145,7 +178,21 @@ export const INITIAL_PROVIDER_ORDERS: ProviderOrder[] = [
     requestedDateTime: 'Today, 02:00 PM',
     deliveryRequirement: 'In-Store Dropoff',
     estimatedPrice: 330,
-    customerNotes: 'Master Stylist Nicole requested.',
+    customerNotes: 'Master Stylist Nicole requested. Attached inspiration photo for Parisian textured waves and natural glow makeup.',
+    uploadedImages: [
+      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=500&auto=format&fit=crop&q=80'
+    ],
+    providerUploadedImages: [
+      {
+        id: 'p-img-4',
+        url: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=500&auto=format&fit=crop&q=80',
+        caption: 'Stylist Kit Preparation: Organic caviar ampoules sterilized and shade palette matched to reference photo',
+        stage: 'Intake Inspection',
+        timestamp: '3 hours ago',
+        uploadedBy: 'Master Stylist Nicole'
+      }
+    ],
     status: 'CONFIRMED',
     statusHistory: [
       { status: 'NEW', timestamp: 'Yesterday' },
@@ -174,9 +221,19 @@ export const INITIAL_PROVIDER_ORDERS: ProviderOrder[] = [
     deliveryRequirement: 'Valet Pickup & Delivery',
     courierStatus: 'Ready',
     estimatedPrice: 185,
-    customerNotes: 'Champion Show Poodle “Barnaby”. Very friendly temperament.',
+    customerNotes: 'Champion Show Poodle “Barnaby”. Very friendly temperament. Attached coat photo.',
     uploadedImages: [
       'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500&auto=format&fit=crop&q=80'
+    ],
+    providerUploadedImages: [
+      {
+        id: 'p-img-5',
+        url: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=500&auto=format&fit=crop&q=80',
+        caption: 'Quality Verification: Hydrotherapy coat blowout and precision scissor trim complete',
+        stage: 'Quality Passed',
+        timestamp: '40 mins ago',
+        uploadedBy: 'Pet Care Specialist Marcus'
+      }
     ],
     status: 'READY',
     statusHistory: [

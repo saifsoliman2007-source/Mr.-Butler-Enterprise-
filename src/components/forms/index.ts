@@ -17,3 +17,4 @@ export * from './ItemQuantityStepper';
 export * from './Upload';
 export * from './ImageInput';
 export * from './LanguageSelector';
+export * from './ProfilePictureUploader';

@@ -50,7 +50,7 @@ import { ScreenProviderOrderDetails } from './components/screens/ScreenProviderO
 import { ScreenProviderMessages } from './components/screens/ScreenProviderMessages';
 import { ScreenProviderProfile } from './components/screens/ScreenProviderProfile';
 import { INITIAL_PROVIDER_ORDERS, INITIAL_PROVIDER_PROFILE } from './data/providerData';
-import { ProviderOrder, ProviderBusinessProfile, OrderStatus } from './types';
+import { ProviderOrder, ProviderBusinessProfile, OrderStatus, ProviderInspectionPhoto } from './types';
 
 // Helper to determine if bottom nav should be displayed
 function shouldShowBottomNav(screen: ScreenId): boolean {
@@ -158,9 +158,72 @@ export default function App() {
     setProviderProfile(updated);
   }, []);
 
+  const handleAddProviderOrderPhoto = useCallback((orderId: string, photo: ProviderInspectionPhoto) => {
+    setProviderOrders((prev) =>
+      prev.map((order) => {
+        if (order.id === orderId) {
+          const updatedImages = [photo, ...(order.providerUploadedImages || [])];
+          const updated = {
+            ...order,
+            providerUploadedImages: updatedImages
+          };
+          if (selectedProviderOrder?.id === orderId) {
+            setSelectedProviderOrder(updated);
+          }
+          return updated;
+        }
+        return order;
+      })
+    );
+  }, [selectedProviderOrder]);
+
   const handleSelectProviderOrder = useCallback((order: ProviderOrder) => {
     setSelectedProviderOrder(order);
   }, []);
+
+  const handleCreateCustomerOrder = useCallback((orderData: Partial<ProviderOrder>) => {
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const category = orderData.category || 'Laundry & Dry Cleaning';
+    const orderNum = `ORD-${Math.floor(9400 + Math.random() * 590)}`;
+    const newOrder: ProviderOrder = {
+      id: `ord-${Date.now()}`,
+      orderNumber: orderNum,
+      customerName: orderData.customerName || (registrationData.role === 'consumer' && registrationData.email ? registrationData.email.split('@')[0].toUpperCase() : 'Lady Eleanor Vance'),
+      customerPhone: orderData.customerPhone || '+966 50 412 8831',
+      customerEmail: orderData.customerEmail || registrationData.email || 'eleanor.vance@mayfair.estate',
+      customerAddress: orderData.customerAddress || 'Suite 18, Royal Penthouse Towers, Gate 4',
+      customerDistrict: orderData.customerDistrict || 'Al Olaya Financial District',
+      category,
+      serviceTitle: orderData.serviceTitle || `${category} Bespoke Order`,
+      items: orderData.items && orderData.items.length > 0
+        ? orderData.items
+        : [{ id: `item-${Date.now()}`, name: `${category} Service`, quantity: 1, price: orderData.estimatedPrice || 85 }],
+      requestedDateTime: orderData.requestedDateTime || 'Tomorrow, 10:00 AM',
+      deliveryRequirement: orderData.deliveryRequirement || 'Valet Pickup & Delivery',
+      courierStatus: 'Awaiting Pickup',
+      estimatedPrice: orderData.estimatedPrice || 85,
+      customerNotes: orderData.customerNotes || '',
+      uploadedImages: orderData.uploadedImages || [],
+      providerUploadedImages: [],
+      status: 'NEW',
+      statusHistory: [
+        {
+          status: 'NEW',
+          timestamp,
+          note: orderData.uploadedImages && orderData.uploadedImages.length > 0
+            ? `Booking confirmed with ${orderData.uploadedImages.length} customer intake inspection photo(s)`
+            : 'New customer booking received'
+        }
+      ],
+      aiSummary: orderData.uploadedImages && orderData.uploadedImages.length > 0
+        ? `Customer uploaded ${orderData.uploadedImages.length} visual inspection photo(s) with custom handling instructions.`
+        : `Standard booking registered with scheduled concierge valet.`
+    };
+
+    setProviderOrders((prev) => [newOrder, ...prev]);
+    setSelectedProviderOrder(newOrder);
+    return newOrder;
+  }, [registrationData]);
 
   // Navigate to screen with full Android & iOS history integration
   const navigateTo = useCallback((screen: ScreenId) => {
@@ -253,23 +316,23 @@ export default function App() {
           )}
 
           {currentScreen === 'book_dry_cleaning' && (
-            <ScreenBookDryCleaning onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+            <ScreenBookDryCleaning onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} onBookingSubmit={handleCreateCustomerOrder} />
           )}
 
           {currentScreen === 'book_tailoring' && (
-            <ScreenBookTailoring onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+            <ScreenBookTailoring onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} onBookingSubmit={handleCreateCustomerOrder} />
           )}
 
           {currentScreen === 'book_shoe_repair' && (
-            <ScreenBookShoeRepair onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+            <ScreenBookShoeRepair onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} onBookingSubmit={handleCreateCustomerOrder} />
           )}
 
           {currentScreen === 'book_beauty_salon' && (
-            <ScreenBookBeautySalon onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+            <ScreenBookBeautySalon onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} onBookingSubmit={handleCreateCustomerOrder} />
           )}
 
           {currentScreen === 'book_pet_care' && (
-            <ScreenBookPetCare onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} />
+            <ScreenBookPetCare onNavigate={navigateTo} lang={language} onLanguageChange={setLanguage} onBookingSubmit={handleCreateCustomerOrder} />
           )}
 
           {/* Concierge Routes */}
@@ -441,6 +504,8 @@ export default function App() {
           {currentScreen === 'consumer_home' && (
             <ConsumerHomePreview
               email={registrationData.email}
+              registrationData={registrationData}
+              onUpdateRegistrationData={updateRegistrationData}
               onNavigate={navigateTo}
               lang={language}
             />
@@ -478,6 +543,7 @@ export default function App() {
                 handleSelectProviderOrder(target);
                 navigateTo('provider_messages');
               }}
+              onAddProviderPhoto={handleAddProviderOrderPhoto}
               lang={language}
             />
           )}

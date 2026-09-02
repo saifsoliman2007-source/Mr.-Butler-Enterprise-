@@ -8,7 +8,8 @@ import {
   PhoneInput, 
   PasswordInput, 
   SegmentedControl, 
-  Checkbox 
+  Checkbox,
+  ProfilePictureUploader 
 } from '../forms';
 import { ArrowRight, ArrowLeft, ShieldCheck, CheckCircle2, User, Sparkles } from 'lucide-react';
 
@@ -32,13 +33,14 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
   const [email, setEmail] = useState(formData.email || 'wayne@manor.com');
   const [phone, setPhone] = useState(formData.businessPhone || '50 123 4567');
   const [password, setPassword] = useState('WayneVault2026!');
+  const [profilePicture, setProfilePicture] = useState<string | null>(formData.profilePicture || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80');
   const [role, setRole] = useState<Role>(formData.role || 'consumer');
   const [acceptTerms, setAcceptTerms] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleRoleChange = (newRole: Role) => {
     setRole(newRole);
-    onUpdateFormData({ role: newRole });
+    onUpdateFormData({ role: newRole, profilePicture: profilePicture || undefined });
     if (newRole === 'provider') {
       onNavigate(6); // Visibly & functionally enter Provider Registration
     }
@@ -55,8 +57,10 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
       return;
     }
     onUpdateFormData({
+      fullName,
       email,
       role,
+      profilePicture: profilePicture || undefined,
       businessPhone: phone
     });
     if (role === 'provider') {
@@ -68,7 +72,9 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
 
   const handleSocialRegister = (provider: string) => {
     onUpdateFormData({
+      fullName,
       email: `${provider.toLowerCase()}@user.mrbutler.com`,
+      profilePicture: profilePicture || undefined,
       role
     });
     if (role === 'provider') {
@@ -175,8 +181,21 @@ export const ScreenAuthenticationLanding: React.FC<ScreenAuthenticationLandingPr
 
         {/* Shared Form Primitives */}
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow-sm border border-[#E2E8F0] dark:border-slate-800">
-          <form onSubmit={handleCreateAccount} className="space-y-3.5">
+          <form onSubmit={handleCreateAccount} className="space-y-4">
             
+            {/* Consumer Profile Picture Uploader */}
+            <div className="pb-2 border-b border-slate-100 dark:border-slate-800 flex justify-center">
+              <ProfilePictureUploader
+                type="consumer"
+                value={profilePicture}
+                onChange={setProfilePicture}
+                label={isRTL ? 'صورة الملف الشخصي للعميل' : 'Consumer Profile Picture'}
+                helperText={isRTL ? 'ارفع صورتك أو اختر نموذج شخصية راقية' : 'Upload photo or choose a VIP avatar preset'}
+                size="md"
+                isRTL={isRTL}
+              />
+            </div>
+
             {/* Full Name */}
             <TextInput
               label={isRTL ? 'الاسم الكامل' : 'Full Name'}

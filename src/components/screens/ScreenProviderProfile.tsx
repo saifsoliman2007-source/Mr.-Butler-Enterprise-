@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Language, ScreenId, ProviderBusinessProfile, ProviderCategory } from '../../types';
 import { translations } from '../../data/translations';
 import { EGEC } from '../EGEC';
+import { ProfilePictureUploader } from '../forms';
 import { 
   ArrowLeft, 
   Building2, 
@@ -109,10 +110,23 @@ export const ScreenProviderProfile: React.FC<ScreenProviderProfileProps> = ({
         {/* Left Card: Business Identity & Verification */}
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-center flex flex-col items-center">
-            <EGEC size="md" shape="rounded-xl" withAura={true} withSheen={true} withBeacon={true} beaconStatus="verified" />
+            
+            {/* Merchant Logo / Photo Uploader */}
+            <div className="w-full flex justify-center pb-2 border-b border-slate-100 dark:border-slate-800">
+              <ProfilePictureUploader
+                type="provider"
+                value={formData.logo || formData.profilePicture || 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=300&auto=format&fit=crop&q=80'}
+                onChange={(img) => setFormData(prev => ({ ...prev, logo: img || undefined, profilePicture: img || undefined }))}
+                label="Artisan Brand Logo / Store Photo"
+                helperText="Click photo to upload or pick a verified emblem"
+                size="md"
+                shape="rounded-2xl"
+              />
+            </div>
 
-            <div>
-              <h2 className="font-serif font-bold text-lg text-slate-900 dark:text-white">
+            <div className="flex flex-col items-center gap-1">
+              <EGEC size="sm" shape="rounded-xl" withAura={true} withSheen={true} withBeacon={true} beaconStatus="verified" />
+              <h2 className="font-serif font-bold text-lg text-slate-900 dark:text-white mt-1">
                 {formData.businessName}
               </h2>
               <p className="text-xs text-slate-500">{formData.serviceCategory}</p>
